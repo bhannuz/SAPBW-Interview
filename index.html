@@ -3,136 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAP Master Library | Study Hub</title>
+    <title>SAP Master Library | Live Editor</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         :root { --sap-blue: #0070d2; --sap-gold: #f39c12; --bg-dark: #0f172a; --card-bg: #1e293b; --text-main: #f8fafc; --text-dim: #94a3b8; }
-        body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Segoe UI', sans-serif; padding-bottom: 50px; }
         
-        /* SIDEBAR */
-        .sidebar { background: var(--card-bg); height: 100vh; padding: 25px; border-right: 1px solid #334155; position: fixed; width: 280px; overflow-y: auto; }
+        .sidebar { background: var(--card-bg); height: 100vh; padding: 25px; border-right: 1px solid #334155; position: fixed; width: 280px; overflow-y: auto; z-index: 1000; }
         .main-content { margin-left: 280px; padding: 40px; min-height: 100vh; }
         
-        .module-btn { width: 100%; text-align: left; background: transparent; border: none; color: var(--text-dim); padding: 12px 15px; border-radius: 10px; margin-bottom: 8px; transition: 0.3s; font-weight: 500; }
-        .module-btn:hover, .module-btn.active { background: var(--sap-blue); color: white; box-shadow: 0 4px 12px rgba(0,112,210,0.3); }
+        .module-btn { width: 100%; text-align: left; background: transparent; border: none; color: var(--text-dim); padding: 12px 15px; border-radius: 10px; margin-bottom: 8px; transition: 0.3s; }
+        .module-btn:hover, .module-btn.active { background: var(--sap-blue); color: white; }
 
-        /* QUIZ MODE STYLING */
-        .tech-card { background: var(--card-bg); border-radius: 15px; padding: 25px; margin-bottom: 20px; border-left: 5px solid var(--sap-gold); cursor: pointer; transition: 0.2s; }
-        .tech-card:hover { transform: translateX(5px); }
-        .answer-content { transition: 0.3s; }
-        .hidden-answer { filter: blur(8px); opacity: 0.1; pointer-events: none; user-select: none; }
+        .tech-card { background: var(--card-bg); border-radius: 15px; padding: 25px; margin-bottom: 20px; border-left: 5px solid var(--sap-gold); position: relative; }
+        .edit-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; color: var(--sap-blue); cursor: pointer; font-size: 1.2rem; }
         
-        /* CONTROLS */
-        .search-box { background: #334155; border: 1px solid #475569; color: white; border-radius: 12px; padding: 15px 25px; width: 100%; margin-bottom: 20px; }
-        .mode-toggle { background: #334155; padding: 10px 20px; border-radius: 10px; display: inline-flex; align-items: center; gap: 10px; margin-bottom: 30px; border: 1px solid #475569; }
-
-        .step-list { list-style: none; padding-left: 0; margin-top: 15px; }
-        .step-list li { padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); position: relative; padding-left: 25px; color: #cbd5e1; }
-        .step-list li::before { content: "✔"; position: absolute; left: 0; color: var(--sap-gold); }
+        .hidden-answer { filter: blur(8px); opacity: 0.1; }
+        .search-box { background: #334155; border: 1px solid #475569; color: white; border-radius: 12px; padding: 12px 20px; width: 100%; }
+        
+        .modal-content { background: var(--card-bg); color: white; border: 1px solid #475569; }
+        .form-control { background: #334155; border: 1px solid #475569; color: white; }
+        .form-control:focus { background: #334155; color: white; border-color: var(--sap-gold); }
 
         @media (max-width: 992px) { 
-            .sidebar { width: 100%; height: auto; position: relative; display: flex; overflow-x: auto; white-space: nowrap; padding: 15px; }
-            .sidebar h4, .sidebar hr, .sidebar .credit { display: none; }
-            .module-btn { width: auto; margin-right: 10px; margin-bottom: 0; }
+            .sidebar { width: 100%; height: auto; position: relative; display: flex; overflow-x: auto; padding: 15px; }
             .main-content { margin-left: 0; padding: 20px; }
+            .sidebar h4, .sidebar hr { display: none; }
         }
     </style>
 </head>
 <body>
 
 <div class="sidebar" id="sidebar">
-    <h4 class="text-warning mb-2">SAP Master Hub</h4>
-    <p class="small text-secondary mb-4">Interview Preparation Guide</p>
+    <h4 class="text-warning mb-4">SAP Library ✏️</h4>
     <div id="moduleNav"></div>
-    <hr style="border-color:#334155;">
-    <div class="credit small text-secondary">Created for AK Learning</div>
 </div>
 
 <div class="main-content">
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-        <div style="flex: 1; min-width: 300px;">
-            <input type="text" id="searchInput" class="search-box mb-0" placeholder="🔍 Search objects (e.g. V3, Transformations, SAC)..." onkeyup="searchTech()">
-        </div>
-        <div class="mode-toggle">
-            <span class="small fw-bold">QUIZ MODE</span>
-            <div class="form-check form-switch mb-0">
-                <input class="form-check-input" type="checkbox" id="quizSwitch" onchange="toggleQuizMode()">
-            </div>
-        </div>
+    <div class="d-flex justify-content-between align-items-center mb-4 gap-3">
+        <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search topics..." onkeyup="searchTech()">
+        <button class="btn btn-warning fw-bold px-4" onclick="openEditModal(null)">➕ Add Topic</button>
+    </div>
+
+    <div class="form-check form-switch mb-4">
+        <input class="form-check-input" type="checkbox" id="quizSwitch" onchange="toggleQuizMode()">
+        <label class="form-check-label small fw-bold" for="quizSwitch">QUIZ MODE (Click cards to reveal)</label>
     </div>
 
     <div id="content-area"></div>
 </div>
 
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">Edit Technical Topic</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editIndex">
+                <div class="mb-3">
+                    <label class="form-label text-warning">Topic / Question</label>
+                    <input type="text" id="editName" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-warning">Definition / Answer</label>
+                    <textarea id="editDef" class="form-control" rows="4"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-warning">Bullet Points (One per line)</label>
+                    <textarea id="editList" class="form-control" rows="4" placeholder="Step 1...&#10;Step 2..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button class="btn btn-danger me-auto" onclick="deleteTopic()">Delete Topic</button>
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" onclick="saveTopic()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // ==========================================
-    // DATA STORE: Add Your Questions Here
-    // ==========================================
-    const sapData = {
-        bw: {
-            title: "SAP BW / BW4HANA",
-            items: [
-                { name: "InfoObject (IOBJ)", def: "The smallest metadata unit in BW. Divided into Characteristics (descriptive data) and Key Figures (measurable data like Revenue)." },
-                { name: "Transformation (TRFN) Rule Types", def: "Used to map source to target fields. Common types include:", list: ["Direct Assignment", "Constant", "Formula", "Read Master Data", "Routine (ABAP Logic)"] },
-                { name: "Start, End & Expert Routines", def: "ABAP segments within a TRFN:", list: ["Start Routine: Executed before transformation, used for filtering.", "Field Routine: Logic for a single specific field.", "End Routine: Executed after mapping, used for post-processing.", "Expert Routine: Replaces all mapping logic with a custom loop."] },
-                { name: "DataSource Enhancement", def: "Process to add custom Z-fields to standard R/3 extractors:", list: ["RSA6: Add Append Structure to Data Source.", "ZZ_FIELD: Define your custom fields.", "CMOD: Enhance Function Exit EXIT_SAPLRSAP_001.", "RSA6: Uncheck 'Hide' and 'Field Only' to expose fields.", "BW: Replicate Data Source and map in TRFN."] },
-                { name: "Update Modes (V1, V2, V3)", def: "The priority levels of data moving into the outbound queue:", table: [
-                    ["V1 Synchronous", "High Priority. Immediate update to database tables."],
-                    ["V2 Asynchronous", "Medium Priority. Statistical updates after V1 finishes."],
-                    ["V3 Batch", "Low Priority. Data is serialized and waits for a background job (LBWE) to move it."]
-                ]}
-            ]
-        },
-        datasphere: {
-            title: "SAP Datasphere",
-            items: [
-                { name: "Data Builder vs Business Builder", def: "Data Builder is for technical modeling (SQL, Graphical Views). Business Builder is for the semantic layer (Dimensions, Fact Models) for business users." },
-                { name: "Spaces", def: "Virtual work environments used to isolate data, users, and compute resources between different departments." },
-                { name: "Replication Flow", def: "A simple way to replicate large volumes of data from S/4HANA or other sources into Datasphere with delta capabilities." }
-            ]
-        },
-        sac: {
-            title: "SAP Analytics Cloud",
-            items: [
-                { name: "SAC Live Connection", def: "Connects to BW/HANA without moving data to the cloud. Best for high security and real-time data." },
-                { name: "SAC Acquired Connection", def: "Data is physically imported into SAC. Best for planning, advanced predictive features, and offline speed." },
-                { name: "Analytic vs. Planning Model", def: "Analytic models are read-only for reporting. Planning models allow users to perform 'What-if' analysis and save data back to the system." }
-            ]
-        },
-        hana: {
-            title: "SAP HANA Modeling",
-            items: [
-                { name: "Calculation Views", def: "The primary modeling tool in HANA Studio/WebIDE. Supports Joins, Unions, Projections, and Aggregations." },
-                { name: "SDA vs SDI", def: "SDA (Smart Data Access): Virtualizes remote data. SDI (Smart Data Integration): Replicates data with real-time transformation." }
-            ]
-        },
-        bo: {
-            title: "BO / WebI",
-            items: [
-                { name: "Web Intelligence (WebI)", def: "Browser-based reporting tool for highly formatted reports using BusinessObjects Universes." },
-                { name: "IDT (Information Design Tool)", def: "Tool used to create .unx Universes that can handle multi-source connections." }
-            ]
-        }
+    // Initial Data
+    const defaultData = {
+        bw: { title: "SAP BW", items: [{ name: "InfoObject", def: "Foundation of BW.", list: ["Char","Key Figure"] }] },
+        datasphere: { title: "Datasphere", items: [{ name: "Spaces", def: "Work environments." }] },
+        sac: { title: "SAC", items: [{ name: "Stories", def: "Visualizations." }] },
+        hana: { title: "HANA", items: [{ name: "Views", def: "Modeling tool." }] },
+        bo: { title: "BO/WebI", items: [{ name: "Universe", def: "Semantic layer." }] }
     };
 
-    // ==========================================
-    // LOGIC ENGINE
-    // ==========================================
+    let sapData = JSON.parse(localStorage.getItem('sapData')) || defaultData;
     let currentModule = "bw";
     let isQuizMode = false;
+    const editModal = new bootstrap.Modal(document.getElementById('editModal'));
 
     function init() {
         const nav = document.getElementById('moduleNav');
-        Object.keys(sapData).forEach((key, idx) => {
+        nav.innerHTML = "";
+        Object.keys(sapData).forEach((key) => {
             const btn = document.createElement('button');
-            btn.className = `module-btn ${idx === 0 ? 'active' : ''}`;
+            btn.className = `module-btn ${key === currentModule ? 'active' : ''}`;
             btn.innerText = sapData[key].title;
-            btn.onclick = () => {
-                document.querySelectorAll('.module-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                currentModule = key;
-                render();
-            };
+            btn.onclick = () => { currentModule = key; init(); render(); };
             nav.appendChild(btn);
         });
         render();
@@ -140,52 +115,68 @@
 
     function render() {
         const data = sapData[currentModule];
-        let html = `<h2 class="mb-4 text-warning">${data.title}</h2>`;
-        
-        data.items.forEach((item, i) => {
+        let html = `<h2 class="text-warning mb-4">${data.title}</h2>`;
+        data.items.forEach((item, idx) => {
             html += `
                 <div class="tech-card" onclick="revealAnswer(this)">
-                    <h5 class="text-info mb-3">Q: ${item.name}</h5>
-                    <div class="answer-content ${isQuizMode ? 'hidden-answer' : ''}">
-                        <p class="mb-2">${item.def}</p>`;
-            
-            if(item.list) {
-                html += `<ul class="step-list">${item.list.map(li => `<li>${li}</li>`).join('')}</ul>`;
-            }
-
-            if(item.table) {
-                html += `<table class="table table-dark table-sm mt-3">
-                    <thead><tr><th>Type</th><th>Logic</th></tr></thead>
-                    <tbody>${item.table.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td></tr>`).join('')}</tbody>
-                </table>`;
-            }
-
-            html += `</div>
-                ${isQuizMode ? '<div class="text-secondary mt-2 small text-center reveal-hint">Click to see answer...</div>' : ''}
-            </div>`;
+                    <button class="edit-btn" onclick="event.stopPropagation(); openEditModal(${idx})">✏️</button>
+                    <h5 class="text-info">Q: ${item.name}</h5>
+                    <div class="answer-area ${isQuizMode ? 'hidden-answer' : ''}">
+                        <p>${item.def}</p>
+                        ${item.list ? `<ul>${item.list.map(l => `<li>${l}</li>`).join('')}</ul>` : ''}
+                    </div>
+                </div>`;
         });
         document.getElementById('content-area').innerHTML = html;
     }
 
-    function toggleQuizMode() {
-        isQuizMode = document.getElementById('quizSwitch').checked;
+    function openEditModal(idx) {
+        document.getElementById('editIndex').value = idx === null ? "" : idx;
+        if (idx !== null) {
+            const item = sapData[currentModule].items[idx];
+            document.getElementById('editName').value = item.name;
+            document.getElementById('editDef').value = item.def;
+            document.getElementById('editList').value = item.list ? item.list.join('\n') : "";
+        } else {
+            document.getElementById('editName').value = "";
+            document.getElementById('editDef').value = "";
+            document.getElementById('editList').value = "";
+        }
+        editModal.show();
+    }
+
+    function saveTopic() {
+        const idx = document.getElementById('editIndex').value;
+        const newItem = {
+            name: document.getElementById('editName').value,
+            def: document.getElementById('editDef').value,
+            list: document.getElementById('editList').value.split('\n').filter(l => l.trim() !== "")
+        };
+
+        if (idx === "") sapData[currentModule].items.push(newItem);
+        else sapData[currentModule].items[idx] = newItem;
+
+        localStorage.setItem('sapData', JSON.stringify(sapData));
+        editModal.hide();
         render();
     }
 
-    function revealAnswer(card) {
-        if(!isQuizMode) return;
-        const answer = card.querySelector('.answer-content');
-        const hint = card.querySelector('.reveal-hint');
-        answer.classList.toggle('hidden-answer');
-        if(hint) hint.style.display = answer.classList.contains('hidden-answer') ? 'block' : 'none';
+    function deleteTopic() {
+        const idx = document.getElementById('editIndex').value;
+        if (idx !== "" && confirm("Delete this topic?")) {
+            sapData[currentModule].items.splice(idx, 1);
+            localStorage.setItem('sapData', JSON.stringify(sapData));
+            editModal.hide();
+            render();
+        }
     }
 
+    function toggleQuizMode() { isQuizMode = document.getElementById('quizSwitch').checked; render(); }
+    function revealAnswer(card) { if(isQuizMode) card.querySelector('.answer-area').classList.toggle('hidden-answer'); }
     function searchTech() {
         const term = document.getElementById('searchInput').value.toLowerCase();
         const cards = document.getElementsByClassName('tech-card');
-        for (let card of cards) {
-            card.style.display = card.innerText.toLowerCase().includes(term) ? "" : "none";
-        }
+        for (let card of cards) card.style.display = card.innerText.toLowerCase().includes(term) ? "" : "none";
     }
 
     init();
