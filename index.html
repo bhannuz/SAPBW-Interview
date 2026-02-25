@@ -3,161 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAP Tech Library | AK Learning</title>
+    <title>SAP Master Library | Study Hub</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        :root { --sap-blue: #0070d2; --sap-gold: #f39c12; --bg-dark: #0f172a; --card-bg: #1e293b; --text-main: #f8fafc; }
-        body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .sidebar { background: var(--card-bg); height: 100vh; padding: 20px; border-right: 1px solid #334155; position: fixed; width: 250px; }
-        .main-content { margin-left: 250px; padding: 40px; }
-        .module-btn { width: 100%; text-align: left; background: transparent; border: none; color: #94a3b8; padding: 12px; border-radius: 8px; margin-bottom: 5px; transition: 0.3s; }
-        .module-btn:hover, .module-btn.active { background: var(--sap-blue); color: white; }
-        .tech-card { background: var(--card-bg); border-radius: 12px; padding: 25px; margin-bottom: 20px; border-left: 5px solid var(--sap-gold); }
-        .code-block { background: #000; color: #2ecc71; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 0.9rem; margin: 10px 0; }
-        .search-box { background: #334155; border: none; color: white; border-radius: 20px; padding: 10px 20px; width: 100%; margin-bottom: 30px; }
-        .badge-sap { background: var(--sap-blue); font-size: 0.7rem; vertical-align: middle; margin-left: 10px; }
-        @media (max-width: 768px) { .sidebar { width: 100%; height: auto; position: relative; } .main-content { margin-left: 0; } }
+        :root { --sap-blue: #0070d2; --sap-gold: #f39c12; --bg-dark: #0f172a; --card-bg: #1e293b; --text-main: #f8fafc; --text-dim: #94a3b8; }
+        body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Segoe UI', sans-serif; }
+        
+        /* SIDEBAR */
+        .sidebar { background: var(--card-bg); height: 100vh; padding: 25px; border-right: 1px solid #334155; position: fixed; width: 280px; overflow-y: auto; }
+        .main-content { margin-left: 280px; padding: 40px; min-height: 100vh; }
+        
+        .module-btn { width: 100%; text-align: left; background: transparent; border: none; color: var(--text-dim); padding: 12px 15px; border-radius: 10px; margin-bottom: 8px; transition: 0.3s; font-weight: 500; }
+        .module-btn:hover, .module-btn.active { background: var(--sap-blue); color: white; box-shadow: 0 4px 12px rgba(0,112,210,0.3); }
+
+        /* QUIZ MODE STYLING */
+        .tech-card { background: var(--card-bg); border-radius: 15px; padding: 25px; margin-bottom: 20px; border-left: 5px solid var(--sap-gold); cursor: pointer; transition: 0.2s; }
+        .tech-card:hover { transform: translateX(5px); }
+        .answer-content { transition: 0.3s; }
+        .hidden-answer { filter: blur(8px); opacity: 0.1; pointer-events: none; user-select: none; }
+        
+        /* CONTROLS */
+        .search-box { background: #334155; border: 1px solid #475569; color: white; border-radius: 12px; padding: 15px 25px; width: 100%; margin-bottom: 20px; }
+        .mode-toggle { background: #334155; padding: 10px 20px; border-radius: 10px; display: inline-flex; align-items: center; gap: 10px; margin-bottom: 30px; border: 1px solid #475569; }
+
+        .step-list { list-style: none; padding-left: 0; margin-top: 15px; }
+        .step-list li { padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); position: relative; padding-left: 25px; color: #cbd5e1; }
+        .step-list li::before { content: "✔"; position: absolute; left: 0; color: var(--sap-gold); }
+
+        @media (max-width: 992px) { 
+            .sidebar { width: 100%; height: auto; position: relative; display: flex; overflow-x: auto; white-space: nowrap; padding: 15px; }
+            .sidebar h4, .sidebar hr, .sidebar .credit { display: none; }
+            .module-btn { width: auto; margin-right: 10px; margin-bottom: 0; }
+            .main-content { margin-left: 0; padding: 20px; }
+        }
     </style>
 </head>
 <body>
 
-<div class="sidebar">
-    <h4 class="text-warning mb-4">SAP Library</h4>
-    <button class="module-btn active" onclick="showModule('bw')">SAP BW / BW4HANA</button>
-    <button class="module-btn" onclick="showModule('hana')">SAP HANA</button>
-    <button class="module-btn" onclick="showModule('bo')">BO / WebI</button>
-    <button class="module-btn" onclick="showModule('afo')">AFO</button>
-    <hr>
-    <div class="small text-secondary">Tech Guides v1.0</div>
+<div class="sidebar" id="sidebar">
+    <h4 class="text-warning mb-2">SAP Master Hub</h4>
+    <p class="small text-secondary mb-4">Interview Preparation Guide</p>
+    <div id="moduleNav"></div>
+    <hr style="border-color:#334155;">
+    <div class="credit small text-secondary">Created for AK Learning</div>
 </div>
 
 <div class="main-content">
-    <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search definitions or objects (e.g. Routines, V3)..." onkeyup="searchTech()">
-    
-    <div id="content-area">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div style="flex: 1; min-width: 300px;">
+            <input type="text" id="searchInput" class="search-box mb-0" placeholder="🔍 Search objects (e.g. V3, Transformations, SAC)..." onkeyup="searchTech()">
         </div>
+        <div class="mode-toggle">
+            <span class="small fw-bold">QUIZ MODE</span>
+            <div class="form-check form-switch mb-0">
+                <input class="form-check-input" type="checkbox" id="quizSwitch" onchange="toggleQuizMode()">
+            </div>
+        </div>
+    </div>
+
+    <div id="content-area"></div>
 </div>
 
 <script>
+    // ==========================================
+    // DATA STORE: Add Your Questions Here
+    // ==========================================
     const sapData = {
         bw: {
-            title: "SAP Business Warehouse (BW)",
+            title: "SAP BW / BW4HANA",
             items: [
-                {
-                    name: "InfoObject (IOBJ)",
-                    def: "The smallest unit in SAP BW. Types include Characteristics, Key Figures, Units, Time, and Technical characteristics."
-                },
-                {
-                    name: "Transformation (TRFN)",
-                    def: "Used to map source fields to target InfoObjects. Contains rule types like Direct, Constant, Formula, and Routines."
-                },
-                {
-                    name: "Routines",
-                    def: "ABAP code snippets used in Transformations. Types: Start Routine (filtering), Field Routine (logic per record), End Routine (post-processing), and Expert Routine."
-                },
-                {
-                    name: "DataSource Enhancement Steps",
-                    def: "How to add custom fields to standard extractors:",
-                    list: [
-                        "Step 1: Go to RSA6, select DataSource.",
-                        "Step 2: Double click 'Append Structure' and add custom fields (starting with ZZ).",
-                        "Step 3: Write logic in CMOD (Function Exit EXIT_SAPLRSAP_001).",
-                        "Step 4: Reactivate DataSource and uncheck 'Hide' in RSA6.",
-                        "Step 5: Replicate in BW and map fields."
-                    ]
-                },
-                {
-                    name: "Pre & Post Enhancement Activities",
-                    def: "Safety checks for data integrity:",
-                    list: [
-                        "Pre-Activity: Clear Delta Queues (RSA7) and ensure no active jobs are running.",
-                        "Pre-Activity: Note down current field mappings.",
-                        "Post-Activity: Extract data in RSA3 to verify logic.",
-                        "Post-Activity: Delete and rebuild Init/Delta in BW if structural changes were made."
-                    ]
-                },
-                {
-                    name: "Update Modes (V1, V2, V3)",
-                    def: "The logic of how data moves from R/3 to Queues:",
-                    table: [
-                        ["V1 (Synchronous)", "Immediate update to tables. High priority."],
-                        ["V2 (Asynchronous)", "Update happens shortly after V1. Statistically less critical."],
-                        ["V3 (Batch)", "Serialized update. Data sits in outbound queue until a background job (LBWE) moves it."]
-                    ]
-                }
+                { name: "InfoObject (IOBJ)", def: "The smallest metadata unit in BW. Divided into Characteristics (descriptive data) and Key Figures (measurable data like Revenue)." },
+                { name: "Transformation (TRFN) Rule Types", def: "Used to map source to target fields. Common types include:", list: ["Direct Assignment", "Constant", "Formula", "Read Master Data", "Routine (ABAP Logic)"] },
+                { name: "Start, End & Expert Routines", def: "ABAP segments within a TRFN:", list: ["Start Routine: Executed before transformation, used for filtering.", "Field Routine: Logic for a single specific field.", "End Routine: Executed after mapping, used for post-processing.", "Expert Routine: Replaces all mapping logic with a custom loop."] },
+                { name: "DataSource Enhancement", def: "Process to add custom Z-fields to standard R/3 extractors:", list: ["RSA6: Add Append Structure to Data Source.", "ZZ_FIELD: Define your custom fields.", "CMOD: Enhance Function Exit EXIT_SAPLRSAP_001.", "RSA6: Uncheck 'Hide' and 'Field Only' to expose fields.", "BW: Replicate Data Source and map in TRFN."] },
+                { name: "Update Modes (V1, V2, V3)", def: "The priority levels of data moving into the outbound queue:", table: [
+                    ["V1 Synchronous", "High Priority. Immediate update to database tables."],
+                    ["V2 Asynchronous", "Medium Priority. Statistical updates after V1 finishes."],
+                    ["V3 Batch", "Low Priority. Data is serialized and waits for a background job (LBWE) to move it."]
+                ]}
+            ]
+        },
+        datasphere: {
+            title: "SAP Datasphere",
+            items: [
+                { name: "Data Builder vs Business Builder", def: "Data Builder is for technical modeling (SQL, Graphical Views). Business Builder is for the semantic layer (Dimensions, Fact Models) for business users." },
+                { name: "Spaces", def: "Virtual work environments used to isolate data, users, and compute resources between different departments." },
+                { name: "Replication Flow", def: "A simple way to replicate large volumes of data from S/4HANA or other sources into Datasphere with delta capabilities." }
+            ]
+        },
+        sac: {
+            title: "SAP Analytics Cloud",
+            items: [
+                { name: "SAC Live Connection", def: "Connects to BW/HANA without moving data to the cloud. Best for high security and real-time data." },
+                { name: "SAC Acquired Connection", def: "Data is physically imported into SAC. Best for planning, advanced predictive features, and offline speed." },
+                { name: "Analytic vs. Planning Model", def: "Analytic models are read-only for reporting. Planning models allow users to perform 'What-if' analysis and save data back to the system." }
             ]
         },
         hana: {
-            title: "SAP HANA Development",
+            title: "SAP HANA Modeling",
             items: [
-                { name: "Calculation Views", def: "A powerful modeling tool in HANA to combine data from multiple tables using Joins, Unions, and Projections." },
-                { name: "SDA (Smart Data Access)", def: "Virtualizing data from external databases without moving it into HANA." }
+                { name: "Calculation Views", def: "The primary modeling tool in HANA Studio/WebIDE. Supports Joins, Unions, Projections, and Aggregations." },
+                { name: "SDA vs SDI", def: "SDA (Smart Data Access): Virtualizes remote data. SDI (Smart Data Integration): Replicates data with real-time transformation." }
             ]
         },
         bo: {
-            title: "SAP BusinessObjects (BO)",
+            title: "BO / WebI",
             items: [
-                { name: "Web Intelligence (WebI)", def: "Ad-hoc reporting tool for business users to create formatted reports." },
-                { name: "Universe (IDT/UDT)", def: "The semantic layer between the database and the report." }
-            ]
-        },
-        afo: {
-            title: "Analysis for Office (AFO)",
-            items: [
-                { name: "Excel Add-in", def: "Allows multidimensional analysis of OLAP sources (BW, HANA) directly in Microsoft Excel." }
+                { name: "Web Intelligence (WebI)", def: "Browser-based reporting tool for highly formatted reports using BusinessObjects Universes." },
+                { name: "IDT (Information Design Tool)", def: "Tool used to create .unx Universes that can handle multi-source connections." }
             ]
         }
     };
 
-    function showModule(mod) {
-        // Update Sidebar Active State
-        document.querySelectorAll('.module-btn').forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
+    // ==========================================
+    // LOGIC ENGINE
+    // ==========================================
+    let currentModule = "bw";
+    let isQuizMode = false;
 
-        const data = sapData[mod];
-        let html = `<h2>${data.title}</h2><hr class="mb-4">`;
+    function init() {
+        const nav = document.getElementById('moduleNav');
+        Object.keys(sapData).forEach((key, idx) => {
+            const btn = document.createElement('button');
+            btn.className = `module-btn ${idx === 0 ? 'active' : ''}`;
+            btn.innerText = sapData[key].title;
+            btn.onclick = () => {
+                document.querySelectorAll('.module-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentModule = key;
+                render();
+            };
+            nav.appendChild(btn);
+        });
+        render();
+    }
+
+    function render() {
+        const data = sapData[currentModule];
+        let html = `<h2 class="mb-4 text-warning">${data.title}</h2>`;
         
-        data.items.forEach(item => {
+        data.items.forEach((item, i) => {
             html += `
-                <div class="tech-card">
-                    <h4 class="text-info">${item.name}</h4>
-                    <p>${item.def}</p>
-            `;
+                <div class="tech-card" onclick="revealAnswer(this)">
+                    <h5 class="text-info mb-3">Q: ${item.name}</h5>
+                    <div class="answer-content ${isQuizMode ? 'hidden-answer' : ''}">
+                        <p class="mb-2">${item.def}</p>`;
             
             if(item.list) {
-                html += '<ul>' + item.list.map(l => `<li>${l}</li>`).join('') + '</ul>';
+                html += `<ul class="step-list">${item.list.map(li => `<li>${li}</li>`).join('')}</ul>`;
             }
 
             if(item.table) {
-                html += `<table class="table table-dark table-sm mt-2">
-                    ${item.table.map(row => `<tr><td><strong>${row[0]}</strong></td><td>${row[1]}</td></tr>`).join('')}
+                html += `<table class="table table-dark table-sm mt-3">
+                    <thead><tr><th>Type</th><th>Logic</th></tr></thead>
+                    <tbody>${item.table.map(r => `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td></tr>`).join('')}</tbody>
                 </table>`;
             }
 
-            html += `</div>`;
+            html += `</div>
+                ${isQuizMode ? '<div class="text-secondary mt-2 small text-center reveal-hint">Click to see answer...</div>' : ''}
+            </div>`;
         });
-        
         document.getElementById('content-area').innerHTML = html;
     }
 
+    function toggleQuizMode() {
+        isQuizMode = document.getElementById('quizSwitch').checked;
+        render();
+    }
+
+    function revealAnswer(card) {
+        if(!isQuizMode) return;
+        const answer = card.querySelector('.answer-content');
+        const hint = card.querySelector('.reveal-hint');
+        answer.classList.toggle('hidden-answer');
+        if(hint) hint.style.display = answer.classList.contains('hidden-answer') ? 'block' : 'none';
+    }
+
     function searchTech() {
-        let input = document.getElementById('searchInput').value.toLowerCase();
-        let cards = document.getElementsByClassName('tech-card');
-        
-        for (let i = 0; i < cards.length; i++) {
-            let title = cards[i].getElementsByTagName('h4')[0].innerText.toLowerCase();
-            let body = cards[i].getElementsByTagName('p')[0].innerText.toLowerCase();
-            if (title.includes(input) || body.includes(input)) {
-                cards[i].style.display = "";
-            } else {
-                cards[i].style.display = "none";
-            }
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        const cards = document.getElementsByClassName('tech-card');
+        for (let card of cards) {
+            card.style.display = card.innerText.toLowerCase().includes(term) ? "" : "none";
         }
     }
 
-    // Initial Load
-    showModule('bw');
+    init();
 </script>
-
 </body>
 </html>
