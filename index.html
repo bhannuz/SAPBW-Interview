@@ -3,194 +3,988 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAP Master Library | Live Editor</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>SAP Master Academy | Learn & Master Enterprise Tech</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --sap-blue: #0070d2; --sap-gold: #f39c12; --bg-dark: #0f172a; --card-bg: #1e293b; --text-main: #f8fafc; --text-dim: #94a3b8; }
-        body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Segoe UI', sans-serif; padding-bottom: 50px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        .sidebar { background: var(--card-bg); height: 100vh; padding: 25px; border-right: 1px solid #334155; position: fixed; width: 280px; overflow-y: auto; z-index: 1000; }
-        .main-content { margin-left: 280px; padding: 40px; min-height: 100vh; }
-        
-        .module-btn { width: 100%; text-align: left; background: transparent; border: none; color: var(--text-dim); padding: 12px 15px; border-radius: 10px; margin-bottom: 8px; transition: 0.3s; }
-        .module-btn:hover, .module-btn.active { background: var(--sap-blue); color: white; }
+        :root {
+            --primary: #0066ff;
+            --primary-dark: #0052cc;
+            --accent: #ff6b35;
+            --accent-light: #ffa366;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --dark: #0f1419;
+            --darker: #0a0e12;
+            --card-bg: #1a1f2e;
+            --card-hover: #232b3c;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b8c1;
+            --text-tertiary: #7a8290;
+            --border: #2d3748;
+            --gradient-1: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
+            --gradient-accent: linear-gradient(135deg, #ff6b35 0%, #ffa366 100%);
+        }
 
-        .tech-card { background: var(--card-bg); border-radius: 15px; padding: 25px; margin-bottom: 20px; border-left: 5px solid var(--sap-gold); position: relative; cursor: pointer; transition: 0.3s; }
-        .tech-card:hover { transform: translateX(5px); }
-        .edit-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; color: var(--sap-blue); cursor: pointer; font-size: 1.2rem; }
-        .edit-btn:hover { color: var(--sap-gold); }
-        
-        .hidden-answer { filter: blur(8px); opacity: 0.1; }
-        .search-box { background: #334155; border: 1px solid #475569; color: white; border-radius: 12px; padding: 12px 20px; width: 100%; }
-        .search-box:focus { background: #334155; color: white; border-color: var(--sap-gold); outline: none; }
-        
-        .modal-content { background: var(--card-bg); color: white; border: 1px solid #475569; }
-        .form-control { background: #334155; border: 1px solid #475569; color: white; }
-        .form-control:focus { background: #334155; color: white; border-color: var(--sap-gold); box-shadow: none; }
-        
-        .badge-category { background: var(--sap-blue); padding: 5px 10px; border-radius: 5px; font-size: 0.75rem; margin-right: 5px; }
-        .quiz-indicator { font-size: 0.9rem; color: var(--text-dim); margin-top: 10px; font-style: italic; }
+        body {
+            background: linear-gradient(135deg, var(--darker) 0%, #1a1f2e 100%);
+            color: var(--text-primary);
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+            position: relative;
+        }
 
-        @media (max-width: 992px) { 
-            .sidebar { width: 100%; height: auto; position: relative; display: flex; overflow-x: auto; padding: 15px; }
-            .main-content { margin-left: 0; padding: 20px; }
-            .sidebar h4, .sidebar hr { display: none; }
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(0, 102, 255, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(255, 107, 53, 0.1) 0%, transparent 50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .container-main { position: relative; z-index: 1; }
+
+        /* Header */
+        header {
+            background: rgba(15, 20, 25, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--gradient-1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .stat-item {
+            text-align: center;
+            animation: fadeInUp 0.6s ease-out 0.1s both;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label { 
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Main Layout */
+        .main-wrapper {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: rgba(26, 31, 46, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+            backdrop-filter: blur(10px);
+        }
+
+        .sidebar-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+
+        .module-btn {
+            width: 100%;
+            background: transparent;
+            border: 2px solid transparent;
+            color: var(--text-secondary);
+            padding: 1rem 1.2rem;
+            border-radius: 12px;
+            margin-bottom: 0.8rem;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .module-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-1);
+            z-index: -1;
+            transition: left 0.3s ease;
+        }
+
+        .module-btn:hover {
+            border-color: var(--primary);
+            transform: translateX(8px);
+        }
+
+        .module-btn.active {
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .module-btn.active::before {
+            left: 0;
+        }
+
+        /* Content Area */
+        .content-area {
+            min-height: 100vh;
+        }
+
+        .top-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            background: rgba(26, 31, 46, 0.6);
+            border: 2px solid var(--border);
+            color: var(--text-primary);
+            border-radius: 14px;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(26, 31, 46, 0.9);
+            box-shadow: 0 0 20px rgba(0, 102, 255, 0.2);
+        }
+
+        .search-box::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 8px 24px rgba(0, 102, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(0, 102, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.9rem 1.8rem;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Toggle & Mode */
+        .mode-toggle {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: rgba(26, 31, 46, 0.6);
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .toggle-switch {
+            width: 50px;
+            height: 28px;
+            background: var(--border);
+            border-radius: 14px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: var(--gradient-1);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 12px;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active::after {
+            left: 24px;
+        }
+
+        /* Cards */
+        .tech-card {
+            background: rgba(26, 31, 46, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            animation: fadeInUp 0.6s ease-out both;
+        }
+
+        .tech-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .tech-card:hover::before {
+            left: 100%;
+        }
+
+        .tech-card:hover {
+            border-color: var(--primary);
+            background: rgba(26, 31, 46, 0.9);
+            transform: translateY(-8px);
+            box-shadow: 0 20px 50px rgba(0, 102, 255, 0.2);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            flex: 1;
+            padding-right: 1rem;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .card-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s ease;
+            padding: 0.5rem;
+        }
+
+        .card-btn:hover {
+            color: var(--accent);
+            transform: scale(1.2);
+        }
+
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .card-definition {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+        }
+
+        .card-list li {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            padding-left: 1.5rem;
+            position: relative;
+            line-height: 1.5;
+        }
+
+        .card-list li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .hidden-answer {
+            filter: blur(10px);
+            pointer-events: none;
+            opacity: 0.4;
+            user-select: none;
+        }
+
+        .reveal-hint {
+            color: var(--text-tertiary);
+            font-size: 0.8rem;
+            margin-top: 1rem;
+            font-style: italic;
+            opacity: 0.7;
+        }
+
+        /* Quiz Mode */
+        .quiz-badge {
+            display: inline-block;
+            background: var(--gradient-accent);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-top: 0.5rem;
+        }
+
+        /* Stats Panel */
+        .stats-panel {
+            background: rgba(26, 31, 46, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.1) 0%, rgba(0, 212, 255, 0.1) 100%);
+            border: 1px solid rgba(0, 102, 255, 0.2);
+        }
+
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-text {
+            color: var(--text-tertiary);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background: rgba(26, 31, 46, 0.6);
+            border-radius: 12px;
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--gradient-1);
+            border-radius: 10px;
+            animation: growProgress 2s ease-out;
+        }
+
+        @keyframes growProgress {
+            from { width: 0; }
+            to { width: var(--progress, 65%); }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1f2e 0%, #232b3c 100%);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.4s ease;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: var(--accent);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .form-input, .form-textarea {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 15px rgba(0, 102, 255, 0.2);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border);
+            padding-top: 1.5rem;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                height: auto;
+                position: relative;
+                top: 0;
+            }
+
+            .header-stats {
+                gap: 1rem;
+            }
+
+            .header-stats .stat-item {
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-wrapper {
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .header-stats {
+                width: 100%;
+                justify-content: space-around;
+            }
+
+            .top-controls {
+                flex-direction: column;
+            }
+
+            .search-box {
+                width: 100%;
+            }
+
+            .tech-card {
+                padding: 1.5rem;
+            }
+
+            .card-title {
+                font-size: 1.1rem;
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-tertiary);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .empty-state-text {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--darker);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
         }
     </style>
 </head>
 <body>
 
-<div class="sidebar" id="sidebar">
-    <h4 class="text-warning mb-4">📚 SAP Library</h4>
-    <div id="moduleNav"></div>
+<header>
+    <div class="logo">
+        <div class="logo-icon">📚</div>
+        SAP Master Academy
+    </div>
+    <div class="header-stats">
+        <div class="stat-item">
+            <div class="stat-value" id="totalCards">0</div>
+            <div class="stat-label">Topics Covered</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="currentModule">-</div>
+            <div class="stat-label">Active Module</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="learningTime">0m</div>
+            <div class="stat-label">Session Time</div>
+        </div>
+    </div>
+</header>
+
+<div class="container-main">
+    <div class="main-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-title">
+                <i class="fas fa-book"></i>
+                Modules
+            </div>
+            <div id="moduleNav"></div>
+        </aside>
+
+        <!-- Content -->
+        <main class="content-area">
+            <!-- Top Controls -->
+            <div class="top-controls">
+                <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search topics, definitions, features..." onkeyup="searchTech()">
+                <button class="btn-primary" onclick="openEditModal(null)">
+                    <i class="fas fa-plus"></i> Add Topic
+                </button>
+                <div class="mode-toggle">
+                    <i class="fas fa-graduation-cap"></i>
+                    <label style="cursor: pointer; user-select: none;">
+                        <input type="checkbox" id="quizSwitch" onchange="toggleQuizMode()" style="display: none;">
+                        <div class="toggle-switch" id="toggleVisual"></div>
+                    </label>
+                    <span style="font-size: 0.85rem; color: var(--text-secondary);">Quiz Mode</span>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-panel">
+                <div class="stat-card">
+                    <div class="stat-number" id="viewedCount">0</div>
+                    <div class="stat-text">Cards Viewed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="masteredCount">0</div>
+                    <div class="stat-text">Mastered</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="studyStreak">0</div>
+                    <div class="stat-text">Day Streak</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="completionRate">0%</div>
+                    <div class="stat-text">Completion</div>
+                </div>
+            </div>
+
+            <!-- Progress -->
+            <div>
+                <div style="margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.9rem;">Learning Progress</div>
+                <div class="progress-container">
+                    <div class="progress-bar" id="progressBar" style="--progress: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div id="content-area"></div>
+        </main>
+    </div>
 </div>
 
-<div class="main-content">
-    <div class="d-flex justify-content-between align-items-center mb-4 gap-3 flex-wrap">
-        <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search topics..." onkeyup="searchTech()" style="flex: 1; min-width: 200px;">
-        <button class="btn btn-warning fw-bold px-4" onclick="openEditModal(null)">➕ Add Topic</button>
-    </div>
-
-    <div class="form-check form-switch mb-4">
-        <input class="form-check-input" type="checkbox" id="quizSwitch" onchange="toggleQuizMode()">
-        <label class="form-check-label small fw-bold" for="quizSwitch">🎯 QUIZ MODE (Click cards to reveal answers)</label>
-    </div>
-
-    <div id="content-area"></div>
-</div>
-
-<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header border-secondary">
-                <h5 class="modal-title">Edit Technical Topic</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+<!-- Edit Modal -->
+<div class="modal" id="editModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Edit Topic</h2>
+            <button class="modal-close" onclick="closeEditModal()">&times;</button>
+        </div>
+        <div>
+            <input type="hidden" id="editIndex">
+            
+            <div class="form-group">
+                <label class="form-label">Question / Topic Name</label>
+                <input type="text" id="editName" class="form-input" placeholder="e.g., What is an Analytic Model?">
             </div>
-            <div class="modal-body">
-                <input type="hidden" id="editIndex">
-                <div class="mb-3">
-                    <label class="form-label text-warning">Topic / Question</label>
-                    <input type="text" id="editName" class="form-control">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label text-warning">Definition / Answer</label>
-                    <textarea id="editDef" class="form-control" rows="4"></textarea>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label text-warning">Bullet Points (One per line)</label>
-                    <textarea id="editList" class="form-control" rows="4" placeholder="Step 1...&#10;Step 2..."></textarea>
-                </div>
+
+            <div class="form-group">
+                <label class="form-label">Definition / Answer</label>
+                <textarea id="editDef" class="form-textarea" placeholder="Provide a clear, concise definition..."></textarea>
             </div>
-            <div class="modal-footer border-secondary">
-                <button class="btn btn-danger me-auto" onclick="deleteTopic()">Delete Topic</button>
-                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button class="btn btn-primary" onclick="saveTopic()">Save Changes</button>
+
+            <div class="form-group">
+                <label class="form-label">Key Points (One per line)</label>
+                <textarea id="editList" class="form-textarea" placeholder="Key feature 1...&#10;Key feature 2...&#10;Key feature 3..."></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeEditModal()">Cancel</button>
+                <button class="btn-primary" onclick="saveTopic()">Save Changes</button>
+                <button class="btn-secondary" style="background: var(--danger); border-color: var(--danger); color: white;" onclick="deleteTopic()">Delete</button>
             </div>
         </div>
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Initial Data with Datasphere Objects
+    // Enhanced Data with Datasphere & More
     const defaultData = {
-        bw: { 
-            title: "SAP BW", 
-            items: [
-                { name: "InfoObject", def: "Foundation of BW modeling. Can be characteristic (dimension) or key figure (measure).", list: ["Characteristic: Dimensions (customer, product, time)", "Key Figure: Measures (revenue, quantity, cost)"] },
-                { name: "InfoCube", def: "Star schema database structure combining dimensions and facts.", list: ["Contains characteristics and key figures", "Basis for BEx queries", "Transactional or aggregated data"] },
-                { name: "CompositeProvider", def: "Combines multiple InfoCubes or InfoObjects without physical joining.", list: ["Virtual object", "Combines heterogeneous sources", "Flexible for complex reporting"] }
-            ]
-        },
         datasphere: { 
-            title: "SAP Datasphere", 
+            title: "🌐 Datasphere", 
+            emoji: "🌐",
             items: [
                 { name: "Table (Local Table)", def: "Physical table stored in SAP Datasphere holding data from imports or replication.", list: ["Store raw data from CSV imports", "Target for replication/data flows", "Can be marked as Relational Dataset, Dimension, or Fact"] },
                 { name: "Remote Table", def: "Virtual reference to table in external source system without importing.", list: ["Real-time federation OR snapshot-based access", "Sources: SAP S/4HANA, BW/4HANA, Databases, Cloud", "Real-time slower; snapshots cache locally"] },
                 { name: "Graphical View", def: "No-code/low-code visual tool to combine, transform, and enrich data.", list: ["Join, Union, Projection, Aggregation, Filter", "Can be Relational Dataset, Dimension, or Fact", "Must be manually deployed"] },
                 { name: "SQL View", def: "View created using SQL code for advanced transformations and complex logic.", list: ["Native HANA SQL syntax", "For scenarios graphical views cannot handle", "Must be manually deployed"] },
-                { name: "Analytic Model (★ PRIMARY)", def: "Multi-dimensional analytical model for consumption in SAP Analytics Cloud.", list: ["Source: Fact Views", "Dimensions, Measures, Calculated Measures, Restricted Measures", "Variables for user input, Hierarchies, Associations", "Replaced Analytical Dataset - now legacy"] },
+                { name: "Analytic Model ⭐", def: "Multi-dimensional analytical model designed for consumption in SAP Analytics Cloud.", list: ["Source: Fact Views", "Dimensions, Measures, Calculated Measures", "Variables for user input, Hierarchies, Associations", "PRIMARY object for analytics"] },
                 { name: "Fact View", def: "View with semantic type Fact - represents transactional/measures data.", list: ["Must have at least one measure", "Must have associations to dimensions", "Source for Analytic Models", "Separates relational from analytical modeling"] },
                 { name: "Dimension View", def: "View with semantic type Dimension containing master data and hierarchies.", list: ["Key Attribute, Text Attributes", "Hierarchies (level-based or parent-child)", "Time-dependent attributes", "Referenced in Facts via associations"] },
-                { name: "Entity-Relationship Model", def: "Data modeling container showing relationships between tables and views.", list: ["Visualize dependencies between objects", "Define relationships and cardinality", "Dependency analysis and impact assessment"] },
-                { name: "Replication Flow", def: "Automated data replication from source systems with initial and delta loads (ELT approach).", list: ["Sources: ABAP CDS Views, ODP Extractors, ABAP Tables", "Load Types: Initial, Delta, or Both", "Targets: Tables, HANA Cloud, external systems", "Auto-deployed and highly efficient"] },
-                { name: "Data Flow", def: "Graphical tool for complex ETL with code capability - transform first, then load.", list: ["Operators: Join, Union, Filter, Aggregation, Python Script", "Python scripting for custom transformations", "Target: Always persists to table", "Must be manually deployed"] },
-                { name: "Task Chain", def: "Workflow orchestrating multiple tasks (flows, jobs) in sequence or parallel.", list: ["Components: Data Flows, Replication Flows, nested Chains", "Execution: Serial or parallel", "Dependency management and error handling", "Similar to BW Process Chains"] },
-                { name: "Semantic Types (Core Concept)", def: "Classification defining analytical purpose of views/tables.", list: ["Relational Dataset: Default, non-analytical", "Dimension: Master data with hierarchies", "Fact: Transactional data with measures"] },
-                { name: "Association", def: "Link between Fact and Dimension objects enabling drill-down and attribute retrieval.", list: ["Source: Field in Fact", "Target: Key in Dimension", "Multi-level associations (A→B→C)", "Only required joins executed at query time"] },
-                { name: "Hierarchy", def: "Organizational structure for dimensions - parent-child or level-based.", list: ["Level-Based: Fixed levels (Country→State→City)", "Parent-Child: Dynamic relationships", "Multiple hierarchies per dimension", "Time-dependent hierarchies supported"] },
-                { name: "Measure/Metric", def: "Numerical value for analysis - KPI or aggregated value.", list: ["Base Measure: Directly from source data", "Calculated Measure: Custom formula", "Restricted Measure: Base measure with filter", "Aggregation: Sum, Average, Min, Max, Count"] },
-                { name: "Variable", def: "Input parameter for dynamic filtering/prompting in Analytic Models.", list: ["Filter Variables: Dimension member selection", "Source Variables: Parameters from fact", "Restricted Measure Variables: Dynamic measure filters", "Mandatory/optional, single/multi-value"] },
-                { name: "Calculated Column", def: "New column derived from existing columns using expressions.", list: ["Add computed fields without views", "Unit conversions, conditional logic", "String manipulation", "Available in views where created"] },
-                { name: "Connection", def: "Configuration for connecting to external data sources.", list: ["Types: S/4HANA, BW/4HANA, Databases, Cloud, SFTP, APIs", "Enable data federation and replication", "Authentication and proxy configuration"] },
-                { name: "Space", def: "Virtual workspace containing models, connections, resources for user group.", list: ["Dedicated storage and compute resources", "User access control within space", "Connection sharing within space", "Isolation from other spaces"] },
-                { name: "Data Access Control (DAC)", def: "Row-level security restricting data access based on user attributes.", list: ["Restrict fact/dimension rows", "Assign users to organizational units", "Applied automatically in models", "Enforce privacy and compliance"] },
-                { name: "Data Catalog", def: "Central metadata repository for governance and discovery.", list: ["Glossary Terms: Business definitions", "KPIs: Key performance indicators", "Repository Explorer: Search and browse", "Impact and Lineage: Dependencies"] },
-                { name: "Intelligent Lookup", def: "Smart joining mechanism for matching entities without traditional keys.", list: ["Fuzzy matching, composite keys", "Solve complex data matching", "More flexible than standard joins", "Higher performance cost"] },
-                { name: "Parameter (Input Parameter)", def: "Dynamic value passed into views/flows at execution time.", list: ["Create parameterized views", "Different scenarios", "Used in graphical views, SQL views, data flows"] }
+                { name: "Replication Flow", def: "Automated data replication from source systems with initial and delta loads (ELT).", list: ["Sources: ABAP CDS Views, ODP Extractors", "Load Types: Initial, Delta, or Both", "Targets: Tables, HANA Cloud, external systems", "Auto-deployed and highly efficient"] },
+                { name: "Data Flow", def: "Graphical tool for complex ETL with code capability - transform first, then load.", list: ["Operators: Join, Union, Filter, Aggregation, Python", "Python scripting for custom transformations", "Target: Always persists to table", "Must be manually deployed"] },
+                { name: "Task Chain", def: "Workflow orchestrating multiple tasks in sequence or parallel.", list: ["Components: Data Flows, Replication Flows, Chains", "Execution: Serial or parallel", "Dependency management and error handling", "Similar to BW Process Chains"] }
+            ]
+        },
+        bw: { 
+            title: "🔷 SAP BW", 
+            emoji: "🔷",
+            items: [
+                { name: "InfoObject", def: "Foundation of BW modeling. Can be characteristic (dimension) or key figure (measure).", list: ["Characteristic: Dimensions like Customer, Product", "Key Figure: Measures like Revenue, Quantity", "InfoObjects are reusable across InfoCubes"] },
+                { name: "InfoCube", def: "Star schema database structure combining dimensions and facts.", list: ["Contains characteristics (dimensions) and key figures (measures)", "Basis for all BEx queries", "Transactional or aggregated data"] },
+                { name: "CompositeProvider", def: "Virtual object combining multiple InfoCubes without physical joining.", list: ["Combines heterogeneous sources", "Flexible for complex reporting", "No aggregation required"] }
             ]
         },
         sac: { 
-            title: "SAC", 
+            title: "📊 SAC Analytics", 
+            emoji: "📊",
             items: [
-                { name: "Story", def: "SAC visualization and dashboard combining multiple pages and visualizations.", list: ["Canvas for designing reports", "Multiple pages for different analyses", "Drill-down and interactive features"] },
-                { name: "Model", def: "Data source connected to SAC from Datasphere or BW.", list: ["Live data connection", "Real-time or cached mode", "Supports analytics and planning"] }
+                { name: "Story", def: "Interactive dashboard and visualization combining multiple pages and charts.", list: ["Canvas for designing reports", "Multiple pages for different analyses", "Drill-down and interactive features"] }
             ]
         },
         hana: { 
-            title: "HANA", 
+            title: "⚡ HANA", 
+            emoji: "⚡",
             items: [
-                { name: "Calculation View", def: "HANA modeling tool combining relational and analytical scenarios.", list: ["Join, Aggregation, Union operations", "Graphical and SQL variants", "Basis for many Datasphere views"] },
-                { name: "Graphical View", def: "Visual composition of HANA objects.", list: ["Join, Union, Projection", "No-code modeling", "Restricted Measures and calculated columns"] }
-            ]
-        },
-        bo: { 
-            title: "BO/WebI", 
-            items: [
-                { name: "Universe", def: "Semantic layer between database and reporting tools.", list: ["Business-friendly object names", "Predefined joins and calculations", "Access control and row-level security"] },
-                { name: "Report", def: "WebI report built on universe", list: ["Query results and formatting", "Drill-down and filters", "Multiple blocks and tables"] }
+                { name: "Calculation View", def: "HANA modeling tool combining relational and analytical scenarios.", list: ["Join, Aggregation, Union operations", "Graphical and SQL variants", "Basis for many Datasphere views"] }
             ]
         }
     };
 
-    let sapData = JSON.parse(localStorage.getItem('sapData')) || defaultData;
+    // State Management
+    let sapData = JSON.parse(localStorage.getItem('sapData')) || JSON.parse(JSON.stringify(defaultData));
     let currentModule = "datasphere";
     let isQuizMode = false;
-    const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+    let sessionTime = 0;
+    let viewedCards = new Set();
+    let masteredCards = new Set();
 
+    // Initialize
     function init() {
+        // Module Navigation
         const nav = document.getElementById('moduleNav');
         nav.innerHTML = "";
         Object.keys(sapData).forEach((key) => {
             const btn = document.createElement('button');
             btn.className = `module-btn ${key === currentModule ? 'active' : ''}`;
-            btn.innerText = sapData[key].title;
+            btn.innerHTML = `${sapData[key].emoji} ${sapData[key].title}`;
             btn.onclick = () => { currentModule = key; init(); render(); };
             nav.appendChild(btn);
         });
+
+        updateHeader();
         render();
+    }
+
+    function updateHeader() {
+        document.getElementById('currentModule').textContent = sapData[currentModule].emoji;
+        document.getElementById('totalCards').textContent = Object.values(sapData).reduce((sum, m) => sum + m.items.length, 0);
     }
 
     function render() {
         const data = sapData[currentModule];
-        let html = `<h2 class="text-warning mb-4">📖 ${data.title}</h2>`;
-        data.items.forEach((item, idx) => {
+        let html = `
+            <div style="margin-bottom: 2rem; animation: fadeInUp 0.6s ease-out;">
+                <h1 style="font-family: 'Playfair Display', serif; font-size: 2.5rem; margin-bottom: 0.5rem; background: var(--gradient-1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                    ${data.emoji} ${data.title}
+                </h1>
+                <p style="color: var(--text-secondary); font-size: 1rem;">Master ${data.items.length} essential concepts</p>
+            </div>
+        `;
+
+        if (data.items.length === 0) {
             html += `
-                <div class="tech-card" onclick="revealAnswer(this)">
-                    <button class="edit-btn" onclick="event.stopPropagation(); openEditModal(${idx})" title="Edit">✏️</button>
-                    <h5 class="text-info">Q: ${item.name}</h5>
-                    <div class="answer-area ${isQuizMode ? 'hidden-answer' : ''}">
-                        <p><strong>A:</strong> ${item.def}</p>
-                        ${item.list && item.list.length > 0 ? `<ul class="mb-0">${item.list.map(l => `<li>${l}</li>`).join('')}</ul>` : ''}
-                        <div class="quiz-indicator">💡 Click to reveal in quiz mode</div>
+                <div class="empty-state">
+                    <div class="empty-state-icon">📝</div>
+                    <div class="empty-state-text">No topics yet. Click "Add Topic" to get started!</div>
+                </div>
+            `;
+        } else {
+            data.items.forEach((item, idx) => {
+                const isViewed = viewedCards.has(`${currentModule}-${idx}`);
+                const isMastered = masteredCards.has(`${currentModule}-${idx}`);
+                html += `
+                    <div class="tech-card" onclick="revealAnswer(this, ${idx})" style="animation-delay: ${idx * 0.05}s;">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                ${item.name}
+                                ${isMastered ? '<span style="color: var(--success); font-size: 0.8rem; margin-left: 0.5rem;">✓ Mastered</span>' : ''}
+                            </h3>
+                            <div class="card-actions">
+                                <button class="card-btn" onclick="event.stopPropagation(); toggleMastered(${idx}, '${currentModule}')" title="Mark as mastered">
+                                    <i class="fas ${isMastered ? 'fa-check-circle' : 'fa-circle'}"></i>
+                                </button>
+                                <button class="card-btn" onclick="event.stopPropagation(); openEditModal(${idx})" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-definition">${item.def}</p>
+                            ${item.list && item.list.length > 0 ? `
+                                <ul class="card-list ${isQuizMode ? 'hidden-answer' : ''}">
+                                    ${item.list.map(l => `<li>${l}</li>`).join('')}
+                                </ul>
+                            ` : ''}
+                            ${isQuizMode ? '<div class="reveal-hint">💡 Click card to reveal details</div>' : ''}
+                        </div>
                     </div>
-                </div>`;
-        });
+                `;
+            });
+        }
         document.getElementById('content-area').innerHTML = html;
+        updateStats();
     }
 
     function openEditModal(idx) {
+        const modal = document.getElementById('editModal');
         document.getElementById('editIndex').value = idx === null ? "" : idx;
+        
         if (idx !== null) {
             const item = sapData[currentModule].items[idx];
             document.getElementById('editName').value = item.name;
@@ -201,45 +995,68 @@
             document.getElementById('editDef').value = "";
             document.getElementById('editList').value = "";
         }
-        editModal.show();
+        modal.classList.add('active');
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').classList.remove('active');
     }
 
     function saveTopic() {
         const idx = document.getElementById('editIndex').value;
         const newItem = {
-            name: document.getElementById('editName').value,
-            def: document.getElementById('editDef').value,
+            name: document.getElementById('editName').value || "Untitled",
+            def: document.getElementById('editDef').value || "",
             list: document.getElementById('editList').value.split('\n').filter(l => l.trim() !== "")
         };
 
-        if (idx === "") sapData[currentModule].items.push(newItem);
-        else sapData[currentModule].items[idx] = newItem;
+        if (idx === "") {
+            sapData[currentModule].items.push(newItem);
+        } else {
+            sapData[currentModule].items[idx] = newItem;
+        }
 
         localStorage.setItem('sapData', JSON.stringify(sapData));
-        editModal.hide();
-        render();
+        closeEditModal();
+        init();
     }
 
     function deleteTopic() {
         const idx = document.getElementById('editIndex').value;
-        if (idx !== "" && confirm("Delete this topic?")) {
+        if (idx !== "" && confirm("Are you sure? This cannot be undone.")) {
             sapData[currentModule].items.splice(idx, 1);
             localStorage.setItem('sapData', JSON.stringify(sapData));
-            editModal.hide();
-            render();
+            closeEditModal();
+            init();
         }
     }
 
-    function toggleQuizMode() { 
-        isQuizMode = document.getElementById('quizSwitch').checked; 
-        render(); 
+    function toggleQuizMode() {
+        isQuizMode = document.getElementById('quizSwitch').checked;
+        document.getElementById('toggleVisual').classList.toggle('active', isQuizMode);
+        render();
     }
 
-    function revealAnswer(card) { 
-        if(isQuizMode) {
-            const answerArea = card.querySelector('.answer-area');
-            answerArea.classList.toggle('hidden-answer');
+    function revealAnswer(card, idx) {
+        if (isQuizMode) {
+            const answerArea = card.querySelector('.card-list');
+            if (answerArea) {
+                answerArea.classList.toggle('hidden-answer');
+            }
         }
+        viewedCards.add(`${currentModule}-${idx}`);
+        updateStats();
+    }
+
+    function toggleMastered(idx, module) {
+        const key = `${module}-${idx}`;
+        if (masteredCards.has(key)) {
+            masteredCards.delete(key);
+        } else {
+            masteredCards.add(key);
+        }
+        updateStats();
+        render();
     }
 
     function searchTech() {
@@ -251,7 +1068,34 @@
         }
     }
 
+    function updateStats() {
+        document.getElementById('viewedCount').textContent = viewedCards.size;
+        document.getElementById('masteredCount').textContent = masteredCards.size;
+        
+        const totalCards = Object.values(sapData).reduce((sum, m) => sum + m.items.length, 0);
+        const completion = totalCards > 0 ? Math.round((masteredCards.size / totalCards) * 100) : 0;
+        document.getElementById('completionRate').textContent = completion + '%';
+        document.getElementById('progressBar').style.setProperty('--progress', completion + '%');
+    }
+
+    // Session Timer
+    setInterval(() => {
+        sessionTime++;
+        const minutes = Math.floor(sessionTime / 60);
+        document.getElementById('learningTime').textContent = minutes + 'm';
+    }, 1000);
+
+    // Click outside modal to close
+    document.addEventListener('click', (e) => {
+        const modal = document.getElementById('editModal');
+        if (e.target === modal) {
+            closeEditModal();
+        }
+    });
+
+    // Initialize
     init();
 </script>
+
 </body>
 </html>
