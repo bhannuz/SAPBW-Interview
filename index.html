@@ -1,561 +1,185 @@
-# SAP Datasphere Objects - Comprehensive Reference Guide
-## For SAP BW Consultants Transitioning to Datasphere
-
----
-
-## OVERVIEW
-
-SAP Datasphere is organized into two main modeling environments with different purposes:
-- **Data Builder**: For technical integration and relational modeling
-- **Business Builder**: For business-oriented semantic modeling (being merged into Analytic Model)
-
----
-
-## DATA BUILDER OBJECTS (Technical Layer)
-
-### 1. **Table (Local Table)**
-**Definition**: A physical table stored in SAP Datasphere that holds data.
-- **Purpose**: Store raw data from imports, CSV files, or as targets for replication/data flows
-- **Semantic Types**: Can be marked as Relational Dataset, Dimension, or Fact
-- **Similar to BW**: Master Data Tables / InfoCubes (before transformation)
-- **Key Features**: Column definition, data types, primary keys
-- **Status**: Automatically deployed when created
-
-### 2. **Remote Table**
-**Definition**: A virtual reference to a table in an external source system.
-- **Purpose**: Access external data without importing it
-- **Options**: Real-time federation OR snapshot-based access
-- **Similar to BW**: InfoSource or Direct ABAP Table read
-- **Sources**: SAP S/4HANA, SAP BW/4HANA, Databases, Cloud sources
-- **Performance**: Real-time queries are slower; snapshots cache data locally
-- **Key Setting**: Can configure initial/delta snapshots for data change capture
-
-### 3. **Graphical View**
-**Definition**: A visual, no-code/low-code modeling tool to combine, transform, and enrich data.
-- **Purpose**: Join, union, filter, and aggregate data without writing SQL
-- **Operators**: Join, Union, Projection, Aggregation, Filter, Calculated Columns, Sort, etc.
-- **Semantic Type**: Relational Dataset, Dimension, or Fact
-- **Persistence**: Can be persisted for better performance
-- **Similar to BW**: Calculation Views or CompositeProviders
-- **Execution**: Transformations run at query time unless persisted
-- **Status**: Must be manually deployed
-
-### 4. **SQL View**
-**Definition**: A view created using SQL code for advanced transformations.
-- **Purpose**: Complex logic, custom calculations, window functions
-- **Language**: Native HANA SQL (SAP HANA specific syntax)
-- **Similar to BW**: Database Views with complex business logic
-- **Complexity**: For scenarios graphical views cannot handle
-- **Performance**: Depends on query complexity and indexing
-- **Status**: Must be manually deployed
-
-### 5. **Analytic Model** (Primary Analytics Object - **NEW**)
-**Definition**: Multi-dimensional analytical model designed for consumption in SAP Analytics Cloud (SAC).
-- **Purpose**: Define business metrics, dimensions, hierarchies, and variables for reporting
-- **Sources**: Fact Views (semantic type Fact)
-- **Key Components**:
-  - **Fact Source**: Core transactional data (required)
-  - **Dimensions**: Analysis axes (attributes, hierarchies)
-  - **Measures**: Base measures from the Fact Source
-  - **Calculated Measures**: Custom KPIs with complex logic
-  - **Restricted Measures**: Measures with pre-defined filters/conditions
-  - **Variables**: Input parameters (filters, selectors, date pickers)
-  - **Associations**: Links to related dimensions for drill-down
-  - **Hierarchies**: Parent-child relationships for analysis
-- **Similar to BW**: BEx Query with variables, calculated key figures, hierarchies
-- **Replaced**: Analytical Dataset (now legacy)
-- **Consumption**: Primary object for SAC and external BI tools via OData
-- **Status**: Must be manually deployed
-- **Advanced Features**: Time-dependent dimensions, exception aggregation, multi-fact
-
-### 6. **Fact View** (Semantic Type: Fact)
-**Definition**: A graphical or SQL view marked with semantic type "Fact".
-- **Purpose**: Represents transactional/measures data - the source for Analytic Models
-- **Key Requirement**: Must have at least one measure and associations to dimensions
-- **Design**: Separates relational from analytical modeling
-- **Replaced**: Analytical Dataset
-- **Status**: Must be manually deployed
-
-### 7. **Dimension View** (Semantic Type: Dimension)
-**Definition**: A view containing master data attributes, texts, and hierarchies.
-- **Purpose**: Support analysis and drill-down in fact data
-- **Components**:
-  - **Key Attribute**: Primary identifier
-  - **Text Attributes**: Descriptive fields
-  - **Hierarchies**: Parent-child or level-based hierarchies
-  - **Time-Dependent Attributes**: Valid-from and valid-to dates
-- **Similar to BW**: Master Data InfoObjects (dimensions)
-- **Usage**: Referenced in Facts via associations
-- **Status**: Must be manually deployed
-
-### 8. **Entity-Relationship (E/R) Model**
-**Definition**: A data modeling container showing relationships between tables and views.
-- **Purpose**: Visualize and manage dependencies between objects
-- **Features**: Define relationships, cardinality, foreign keys
-- **Similar to BW**: Logical data model documentation
-- **Benefit**: Dependency analysis and impact assessment
-
----
-
-## DATA INTEGRATION OBJECTS (ETL/ELT Layer)
-
-### 9. **Replication Flow**
-**Definition**: Automated data replication from source systems with initial and delta loads.
-- **Purpose**: Copy data from external sources into SAP Datasphere
-- **Approach**: ELT (Extract, Load, Transform) - load first, transform later
-- **Sources**: ABAP CDS Views (recommended), ODP Extractors, ABAP Tables, etc.
-- **Load Types**:
-  - Initial Load: Full data copy
-  - Delta Load: Incremental changes only
-  - Initial and Delta: Both capabilities
-- **Targets**: Local Tables, SAP HANA Cloud, SAP HANA Database, external systems
-- **Scheduling**: Can run once or on a schedule
-- **Monitoring**: Data Integration Monitor tracks execution
-- **Similar to BW**: LoanTrans processes or Update Rules with initialization
-- **Performance**: Highly efficient for mass data movement
-- **Status**: Auto-deployed
-
-### 10. **Data Flow** (Transformation Flow)
-**Definition**: Graphical tool for complex ETL operations with code capability.
-- **Purpose**: Transform data with business logic before loading into target
-- **Approach**: ETL (Extract, Transform, Load) - transform first, then load
-- **Operators**: Join, Union, Projection, Filter, Aggregation, Python Script, etc.
-- **Python Scripting**: Custom transformations via Python code
-- **Input Parameters**: Dynamic filtering based on user input
-- **Target**: Always persists to a local table
-- **Scheduling**: Can run once or on a schedule
-- **Similar to BW**: InfoPackage with transformation routines
-- **Use Case**: Complex business logic, cross-source enrichment
-- **Status**: Must be manually deployed
-
-### 11. **Task Chain**
-**Definition**: A workflow that orchestrates multiple tasks (flows, jobs) in sequence or parallel.
-- **Purpose**: Automate complex data integration scenarios
-- **Components**: 
-  - Data Flows
-  - Replication Flows
-  - Transformation Flows
-  - Nested Task Chains
-  - REST API Calls
-- **Execution**: Serial (one after another) or parallel
-- **Scheduling**: Run once or periodically
-- **Dependency Management**: Define success/failure conditions
-- **Similar to BW**: Process Chains (variant scheduling, dependencies)
-- **Error Handling**: Stop on failure or continue
-- **Status**: Auto-deployed
-
----
-
-## SEMANTIC TYPES (Core Concept in Data Builder)
-
-When creating a view or table, you assign a semantic type that defines its analytical purpose:
-
-### **Relational Dataset**
-- Default type for non-analytical purposes
-- No specific analytical meaning
-- Used as intermediate layers or for external data sharing
-- Cannot be source for Analytic Model
-
-### **Dimension**
-- Contains master data attributes, texts, hierarchies
-- No measures
-- Used to provide drill-down and filtering axes
-- Must have a key attribute
-- Can have:
-  - Text attributes
-  - Hierarchies (level-based or parent-child)
-  - Time-dependent attributes
-
-### **Fact**
-- Contains one or more measures (KPI values)
-- Contains or references dimensions via associations
-- Forms the foundation for Analytic Models
-- Replaces the deprecated Analytical Dataset
-- Key requirement: Must be explicitly marked as Fact
-
----
-
-## BUSINESS BUILDER OBJECTS (Semantic/Business Layer)
-
-**Note**: SAP is migrating Business Builder functionality to Analytic Models. Use Data Builder Analytic Models for new projects.
-
-### 12. **Dimension** (Business Builder)
-**Definition**: Business-oriented dimension with attributes and hierarchies.
-- **Purpose**: Provide business context to fact data
-- **Source**: Dimension views from Data Builder
-- **Features**: Hierarchies, attributes, text
-- **Status**: Similar to Data Builder Dimension
-
-### 13. **Fact Model** (Business Builder)
-**Definition**: Groups related facts and dimensions for business reporting.
-- **Purpose**: Organize multiple facts together
-- **Features**: Pre-joined facts and dimensions
-- **Deprecation**: Functionality moving to Analytic Models
-- **Status**: New projects should use Analytic Models
-
-### 14. **Consumption Model** (Business Builder)
-**Definition**: Business-focused model combining facts, dimensions, measures, variables.
-- **Purpose**: Expose data for consumption in SAC
-- **Features**: 
-  - Calculated KPIs
-  - Restrictions and filters
-  - Variables for user input
-  - Hierarchies and drill-paths
-- **Deprecation**: Functionality merging into Analytic Models
-- **Status**: New projects should use Analytic Models
-
-### 15. **Perspective** (Business Builder)
-**Definition**: A specialized view of a Fact Model for specific business use cases.
-- **Purpose**: Subset of a Fact Model with focused measures and dimensions
-- **Use Case**: Different stakeholders see different perspectives of same data
-- **Similar to BW**: Query with restricted InfoObjects
-- **Status**: Can create multiple perspectives from one Fact Model
-
----
-
-## ADVANCED OBJECTS & FEATURES
-
-### 16. **Intelligent Lookup**
-**Definition**: Smart joining mechanism for matching entities without traditional keys.
-- **Purpose**: Solve complex data matching scenarios (fuzzy matching, composite keys)
-- **Use Case**: Address matching, customer deduplication
-- **Advantage**: More flexible than standard joins
-- **Complexity**: Higher performance cost than direct joins
-
-### 17. **Association**
-**Definition**: Link between a Fact and Dimension objects.
-- **Purpose**: Enable drill-down and attribute retrieval in analysis
-- **Components**: 
-  - Source: Field in Fact
-  - Target: Key in Dimension
-- **Features**:
-  - Multi-level associations (A→B→C)
-  - Transitive attributes (attributes of associated dimensions)
-  - Only required joins are executed at query time
-- **Similar to BW**: Foreign keys and dimension relationships
-- **Performance**: Lazy evaluation - only accessed dimensions are joined
-
-### 18. **Hierarchy**
-**Definition**: Organizational structure (parent-child or level-based) for dimensions.
-- **Types**:
-  - **Level-Based**: Org hierarchy with fixed levels (Country→State→City)
-  - **Parent-Child**: Dynamic relationships (Employee→Manager)
-  - **Time-Based**: Calendar hierarchies
-- **Features**: Multiple hierarchies per dimension, time-dependent hierarchies
-- **Similar to BW**: Navigational hierarchies and attributes
-- **Usage**: Drill-down paths in analysis
-
-### 19. **Measure / Metric**
-**Definition**: A numerical value for analysis (KPI, aggregated value).
-- **Types**:
-  - **Base Measure**: Directly from source data (revenue, quantity)
-  - **Calculated Measure**: Custom formula (profit = revenue - cost)
-  - **Restricted Measure**: Base measure with built-in filter (YTD sales)
-- **Aggregation**: Sum, Average, Min, Max, Count, etc.
-- **Similar to BW**: Key Figures (InfoObject type Quantity/Unit)
-
-### 20. **Variable**
-**Definition**: Input parameter for dynamic filtering/prompting in Analytic Models.
-- **Types**:
-  - **Filter Variables**: Dimension member selection
-  - **Source Variables**: Parameters from fact source
-  - **Restricted Measure Variables**: Dynamic measure restrictions
-  - **Reference Data Variables**: Point-in-time for time-dependent data
-- **Features**: Mandatory/optional, single/multi-value, defaults
-- **Similar to BW**: BEx Variables (selection, replacement path, etc.)
-- **Usage**: Enable dynamic user prompts in SAC
-
-### 21. **Calculated Column**
-**Definition**: A new column derived from existing columns using expressions.
-- **Purpose**: Add computed fields without creating views
-- **Uses**: Unit conversions, conditional logic, string manipulation
-- **Scope**: Available in views where created
-
-### 22. **Parameter** (Input Parameter)
-**Definition**: Dynamic value passed into views/flows at execution time.
-- **Purpose**: Create parameterized views for different scenarios
-- **Usage**: In graphical views, SQL views, data flows
-- **Similar to BW**: Selection parameters in queries
-
----
-
-## CONSUMPTION & GOVERNANCE OBJECTS
-
-### 23. **Connection**
-**Definition**: Configuration for connecting to external data sources.
-- **Types**: SAP S/4HANA, SAP BW/4HANA, SAP Analytics Cloud, Databases, Cloud sources, SFTP, APIs, etc.
-- **Purpose**: Enable data federation and replication
-- **Features**: Authentication, proxy configuration, capacity allocation
-- **Similar to BW**: Source System configuration
-
-### 24. **Space**
-**Definition**: Virtual workspace containing models, connections, and resources for a user group.
-- **Purpose**: Organize and isolate work by business unit or project
-- **Features**:
-  - Dedicated storage and compute resources
-  - User access control
-  - Connection sharing within space
-  - Data governance boundaries
-- **Similar to BW**: InfoArea or content area grouping
-- **Isolation**: Spaces don't share data unless explicitly exposed
-
-### 25. **Data Access Control (DAC)**
-**Definition**: Row-level security restricting data access based on user attributes.
-- **Purpose**: Enforce data privacy and compliance rules
-- **Features**: Restrict fact/dimension rows, assign users to organizational units
-- **Similar to BW**: Infoobject Authorizations and analysis authorization
-- **Application**: Applied automatically in Analytic Models and views
-
-### 26. **Data Catalog**
-**Definition**: Central metadata repository for governance and discovery.
-- **Components**:
-  - **Glossary Terms**: Business definitions
-  - **KPIs**: Key performance indicators with metrics
-  - **Repository Explorer**: Search and browse all objects
-  - **Impact and Lineage**: Dependencies between objects
-- **Purpose**: Data governance, self-service exploration
-- **Similar to BW**: Metadata repository and business metadata
-- **Artifacts**: Catalog curated objects for business users
-
-### 27. **Transformation Flow**
-**Definition**: Alternative to Data Flow with focus on simple transformations.
-- **Purpose**: Light ETL operations
-- **Status**: Overlaps with Data Flow functionality
-
----
-
-## OBJECT HIERARCHY & RELATIONSHIPS
-
-```
-DATA FOUNDATION (Storage)
-├── Table (Local Table)
-│   ├── Raw data from CSV imports
-│   ├── Target for replication/data flows
-│   └── Various semantic types
-│
-├── Remote Table
-│   └── Virtual reference to external source
-│
-└── E/R Model
-    └── Organize relationships
-
-TRANSFORMATION LAYER (Relational)
-├── Graphical View
-│   ├── Join, Filter, Aggregate
-│   └── Can be Fact, Dimension, or Relational
-│
-├── SQL View
-│   └── Complex transformations
-│
-└── Views with Semantic Types
-    ├── Dimension View (Master Data)
-    └── Fact View (Transactional Data)
-
-ANALYTICS LAYER (Multi-Dimensional)
-├── Analytic Model ⭐ (PRIMARY)
-│   ├── Sources: Fact Views
-│   ├── Dimensions: Attributes & Hierarchies
-│   ├── Measures: Base & Calculated
-│   ├── Variables: User Input
-│   └── Exposed to SAC
-
-INTEGRATION LAYER (ETL/ELT)
-├── Replication Flow (ELT - Load first)
-│   └── Target: Table, HANA Cloud, External
-│
-├── Data Flow (ETL - Transform first)
-│   └── Target: Always Table
-│
-└── Task Chain
-    ├── Orchestrates Flows
-    ├── Sequences & Parallels
-    └── Scheduling & Error Handling
-
-CONSUMPTION & GOVERNANCE
-├── Data Catalog
-├── Data Access Controls
-└── Connections
-```
-
----
-
-## MAPPING: BW OBJECTS → DATASPHERE OBJECTS
-
-| BW Object | Datasphere Equivalent | Notes |
-|-----------|----------------------|-------|
-| InfoObject (Quantity) | Measure | Base metric for analysis |
-| InfoObject (Dimension) | Dimension View | Master data reference |
-| InfoCube | Fact View + Analytic Model | Separation of relational/analytical |
-| CompositeProvider | Analytic Model | Multi-source analysis |
-| Calculation View | Graphical View | Transformation logic |
-| InfoPackage | Replication Flow / Data Flow | Data loading |
-| Process Chain | Task Chain | Workflow orchestration |
-| BEx Query | Analytic Model | User-facing analytics |
-| Exit Variables | Variables | Dynamic prompting |
-| Analysis Authorizations | Data Access Controls | Row-level security |
-| Authorization Objects | Role Assignments | Access management |
-
----
-
-## KEY DIFFERENCES: BW vs DATASPHERE
-
-| Aspect | BW | Datasphere |
-|--------|----|-----------:|
-| Architecture | Star Schema (Dimensions + Facts) | Relational + Analytical (separated) |
-| Modeling | Two levels (InfoCube + Query) | Three levels (Table + View + Analytic Model) |
-| ETL | Process Chains | Task Chains + Replication Flows |
-| Deployment | Auto (most objects) | Manual (must click Deploy) |
-| Transformation | ETL (Transformation in loading) | ELT option (Transform after loading) |
-| Analytics | BEx Query | Analytic Model |
-| Consumption | BEx/Analysis for Office | SAC (tightly integrated) |
-| Cloud | Only BW/4HANA on HANA Cloud | Cloud-native (Datasphere is cloud-only) |
-| Scalability | Fixed hardware | Elastic (pay-per-use capacity) |
-
----
-
-## DEPLOYMENT & STATUS CONCEPTS
-
-**Auto-Deployed** (On creation):
-- Remote Tables
-- Tables from CSV imports
-- Replication Flows
-- Task Chains
-
-**Manual Deploy** (Requires explicit action):
-- Graphical Views
-- SQL Views
-- Analytic Models
-- Dimensions with hierarchies
-
-**Deployment Process**:
-1. Design object in design-time
-2. Click "Deploy" button
-3. System validates and pushes to runtime HANA
-4. Status shows "Deployed" (green checkmark)
-
-**Edit Existing Objects**:
-- Make changes in design-time
-- Redeploy to apply changes
-- Status changes to "Changes to Deploy" (warning icon)
-
----
-
-## SEMANTIC TYPES - DECISION TREE
-
-When creating a view, choose semantic type:
-
-```
-Is this master data (attributes, hierarchies)?
-├─ YES → Semantic Type: DIMENSION
-│
-Is this transactional/measures data?
-├─ YES → Semantic Type: FACT
-│
-Otherwise
-└─ → Semantic Type: RELATIONAL DATASET
-```
-
----
-
-## COMMON MODELING PATTERNS
-
-### Pattern 1: Simple Transactional Reporting
-```
-Sales_Table (Remote) 
-  ↓ [Graphical View - Semantic: Fact]
-  Sales_Fact_View
-  ↓ [Analytic Model]
-  Sales_Analytics
-  ↓ [Consume in SAC]
-```
-
-### Pattern 2: Master Data with Hierarchy
-```
-Product_Table (Remote/Local)
-  ↓ [Graphical View - Add Hierarchy - Semantic: Dimension]
-  Product_Dimension_View
-  ↓ [Referenced from Analytic Model via Association]
-  Sales_Analytics
-```
-
-### Pattern 3: Complex Transformation
-```
-Source Tables
-  ↓ [Data Flow - Multiple Transforms]
-  Staging_Table
-  ↓ [Graphical View - Business Logic]
-  Business_Fact_View
-  ↓ [Analytic Model - Measures & KPIs]
-  Final_Analytics
-```
-
-### Pattern 4: Regular Data Load
-```
-Source System
-  ↓ [Replication Flow - Delta Load]
-  Raw_Table
-  ↓ [Task Chain - Orchestrate]
-  ├─ Cleansing_DataFlow → Clean_Table
-  ├─ Enrichment_DataFlow → Enriched_Table
-  └─ Aggregation_DataFlow → Summary_Table
-  ↓ [Graphical View]
-  Fact_View
-  ↓ [Analytic Model]
-  Analytics_Model
-```
-
----
-
-## QUICK REFERENCE: WHEN TO USE WHAT
-
-| Scenario | Use This |
-|----------|----------|
-| Access external table (federation) | Remote Table |
-| Simple transformations (join, filter) | Graphical View |
-| Complex/custom SQL logic | SQL View |
-| Deliver metrics for business users | Analytic Model |
-| Load data from source system | Replication Flow |
-| Complex transformations + load | Data Flow |
-| Automate multiple tasks | Task Chain |
-| Define drill-down axes | Dimension View |
-| Define measures/KPIs | Fact View + Analytic Model |
-| Row-level security | Data Access Control |
-| Performance optimization | Persist View / Snapshot |
-| Metadata governance | Data Catalog |
-
----
-
-## KEY TAKEAWAYS FOR BW CONSULTANTS
-
-1. **Separation of Concerns**: Datasphere separates relational (Tables/Views) from analytical (Analytic Model) modeling, unlike BW's combined approach
-
-2. **Always Deploy**: Unlike BW where most objects auto-deploy, Datasphere views must be manually deployed
-
-3. **Analytic Model is Your Star**: Analytic Model replaces BEx Query + Analytical Dataset. Focus here for analytics
-
-4. **Flexible Extraction**: Choose between ELT (Replication Flow) or ETL (Data Flow) based on your needs
-
-5. **Cloud-First**: Datasphere is cloud-only with elastic scaling - no on-premise option
-
-6. **SAC Integration**: Analytic Models are tightly integrated with SAC (similar to BEx + Analysis tools)
-
-7. **Hierarchies in Dimensions**: Like BW, hierarchies live in dimension objects, not queries
-
-8. **Variables for Prompting**: Like BEx variables, Datasphere variables enable user input for dynamic filtering
-
-9. **No InfoObjects**: BW's multi-purpose InfoObjects are split - some become Dimensions, some Measures
-
-10. **Git-Like Approach**: Task Chains orchestrate like Process Chains, but with cleaner dependency management
-
----
-
-## RESOURCES FOR DEEPER LEARNING
-
-- SAP Learning Hub: Datasphere tutorials and guided learning paths
-- SAP Community: Datasphere blog series and technical discussions
-- SAP Help Documentation: Official reference for all objects
-- SAP Datasphere Academy: Certification preparation courses
-
----
-
-**Document Version**: 1.0 | **Date**: February 2026 | **For**: BW Consultants New to Datasphere
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAP Master Library | Live Editor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { --sap-blue: #0070d2; --sap-gold: #f39c12; --bg-dark: #0f172a; --card-bg: #1e293b; --text-main: #f8fafc; --text-dim: #94a3b8; }
+        body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Segoe UI', sans-serif; padding-bottom: 50px; }
+        
+        .sidebar { background: var(--card-bg); height: 100vh; padding: 25px; border-right: 1px solid #334155; position: fixed; width: 280px; overflow-y: auto; z-index: 1000; }
+        .main-content { margin-left: 280px; padding: 40px; min-height: 100vh; }
+        
+        .module-btn { width: 100%; text-align: left; background: transparent; border: none; color: var(--text-dim); padding: 12px 15px; border-radius: 10px; margin-bottom: 8px; transition: 0.3s; }
+        .module-btn:hover, .module-btn.active { background: var(--sap-blue); color: white; }
+
+        .tech-card { background: var(--card-bg); border-radius: 15px; padding: 25px; margin-bottom: 20px; border-left: 5px solid var(--sap-gold); position: relative; }
+        .edit-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; color: var(--sap-blue); cursor: pointer; font-size: 1.2rem; }
+        
+        .hidden-answer { filter: blur(8px); opacity: 0.1; }
+        .search-box { background: #334155; border: 1px solid #475569; color: white; border-radius: 12px; padding: 12px 20px; width: 100%; }
+        
+        .modal-content { background: var(--card-bg); color: white; border: 1px solid #475569; }
+        .form-control { background: #334155; border: 1px solid #475569; color: white; }
+        .form-control:focus { background: #334155; color: white; border-color: var(--sap-gold); }
+
+        @media (max-width: 992px) { 
+            .sidebar { width: 100%; height: auto; position: relative; display: flex; overflow-x: auto; padding: 15px; }
+            .main-content { margin-left: 0; padding: 20px; }
+            .sidebar h4, .sidebar hr { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar" id="sidebar">
+    <h4 class="text-warning mb-4">SAP Library ✏️</h4>
+    <div id="moduleNav"></div>
+</div>
+
+<div class="main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4 gap-3">
+        <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search topics..." onkeyup="searchTech()">
+        <button class="btn btn-warning fw-bold px-4" onclick="openEditModal(null)">➕ Add Topic</button>
+    </div>
+
+    <div class="form-check form-switch mb-4">
+        <input class="form-check-input" type="checkbox" id="quizSwitch" onchange="toggleQuizMode()">
+        <label class="form-check-label small fw-bold" for="quizSwitch">QUIZ MODE (Click cards to reveal)</label>
+    </div>
+
+    <div id="content-area"></div>
+</div>
+
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">Edit Technical Topic</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editIndex">
+                <div class="mb-3">
+                    <label class="form-label text-warning">Topic / Question</label>
+                    <input type="text" id="editName" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-warning">Definition / Answer</label>
+                    <textarea id="editDef" class="form-control" rows="4"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-warning">Bullet Points (One per line)</label>
+                    <textarea id="editList" class="form-control" rows="4" placeholder="Step 1...&#10;Step 2..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button class="btn btn-danger me-auto" onclick="deleteTopic()">Delete Topic</button>
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" onclick="saveTopic()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Initial Data
+    const defaultData = {
+        bw: { title: "SAP BW", items: [{ name: "InfoObject", def: "Foundation of BW.", list: ["Char","Key Figure"] }] },
+        datasphere: { title: "Datasphere", items: [{ name: "Spaces", def: "Work environments." }] },
+        sac: { title: "SAC", items: [{ name: "Stories", def: "Visualizations." }] },
+        hana: { title: "HANA", items: [{ name: "Views", def: "Modeling tool." }] },
+        bo: { title: "BO/WebI", items: [{ name: "Universe", def: "Semantic layer." }] }
+    };
+
+    let sapData = JSON.parse(localStorage.getItem('sapData')) || defaultData;
+    let currentModule = "bw";
+    let isQuizMode = false;
+    const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+
+    function init() {
+        const nav = document.getElementById('moduleNav');
+        nav.innerHTML = "";
+        Object.keys(sapData).forEach((key) => {
+            const btn = document.createElement('button');
+            btn.className = `module-btn ${key === currentModule ? 'active' : ''}`;
+            btn.innerText = sapData[key].title;
+            btn.onclick = () => { currentModule = key; init(); render(); };
+            nav.appendChild(btn);
+        });
+        render();
+    }
+
+    function render() {
+        const data = sapData[currentModule];
+        let html = `<h2 class="text-warning mb-4">${data.title}</h2>`;
+        data.items.forEach((item, idx) => {
+            html += `
+                <div class="tech-card" onclick="revealAnswer(this)">
+                    <button class="edit-btn" onclick="event.stopPropagation(); openEditModal(${idx})">✏️</button>
+                    <h5 class="text-info">Q: ${item.name}</h5>
+                    <div class="answer-area ${isQuizMode ? 'hidden-answer' : ''}">
+                        <p>${item.def}</p>
+                        ${item.list ? `<ul>${item.list.map(l => `<li>${l}</li>`).join('')}</ul>` : ''}
+                    </div>
+                </div>`;
+        });
+        document.getElementById('content-area').innerHTML = html;
+    }
+
+    function openEditModal(idx) {
+        document.getElementById('editIndex').value = idx === null ? "" : idx;
+        if (idx !== null) {
+            const item = sapData[currentModule].items[idx];
+            document.getElementById('editName').value = item.name;
+            document.getElementById('editDef').value = item.def;
+            document.getElementById('editList').value = item.list ? item.list.join('\n') : "";
+        } else {
+            document.getElementById('editName').value = "";
+            document.getElementById('editDef').value = "";
+            document.getElementById('editList').value = "";
+        }
+        editModal.show();
+    }
+
+    function saveTopic() {
+        const idx = document.getElementById('editIndex').value;
+        const newItem = {
+            name: document.getElementById('editName').value,
+            def: document.getElementById('editDef').value,
+            list: document.getElementById('editList').value.split('\n').filter(l => l.trim() !== "")
+        };
+
+        if (idx === "") sapData[currentModule].items.push(newItem);
+        else sapData[currentModule].items[idx] = newItem;
+
+        localStorage.setItem('sapData', JSON.stringify(sapData));
+        editModal.hide();
+        render();
+    }
+
+    function deleteTopic() {
+        const idx = document.getElementById('editIndex').value;
+        if (idx !== "" && confirm("Delete this topic?")) {
+            sapData[currentModule].items.splice(idx, 1);
+            localStorage.setItem('sapData', JSON.stringify(sapData));
+            editModal.hide();
+            render();
+        }
+    }
+
+    function toggleQuizMode() { isQuizMode = document.getElementById('quizSwitch').checked; render(); }
+    function revealAnswer(card) { if(isQuizMode) card.querySelector('.answer-area').classList.toggle('hidden-answer'); }
+    function searchTech() {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        const cards = document.getElementsByClassName('tech-card');
+        for (let card of cards) card.style.display = card.innerText.toLowerCase().includes(term) ? "" : "none";
+    }
+
+    init();
+</script>
+</body>
+</html>
