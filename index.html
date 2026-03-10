@@ -3,1506 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAP Master Academy Pro | Learn & Remember Forever</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=IBM+Plex+Mono:wght@400;600&family=Playfair+Display:wght@700&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>SAP Master Library | Live Editor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --sap-blue: #0070d2; --sap-gold: #f39c12; --bg-dark: #0f172a; --card-bg: #1e293b; --text-main: #f8fafc; --text-dim: #94a3b8; }
+        body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Segoe UI', sans-serif; padding-bottom: 50px; }
         
-        :root {
-            --primary: #0066ff;
-            --primary-dark: #0052cc;
-            --accent: #ff6b35;
-            --accent-light: #ffa366;
-            --success: #2ecc71;
-            --warning: #f39c12;
-            --danger: #e74c3c;
-            --info: #3498db;
-            --dark: #0f1419;
-            --darker: #0a0e12;
-            --card-bg: #1a1f2e;
-            --card-hover: #232b3c;
-            --text-primary: #ffffff;
-            --text-secondary: #b0b8c1;
-            --text-tertiary: #7a8290;
-            --border: #2d3748;
-            --gradient-1: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
-            --gradient-accent: linear-gradient(135deg, #ff6b35 0%, #ffa366 100%);
-            --gradient-success: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-        }
-
-        html { scroll-behavior: smooth; }
-        body {
-            background: linear-gradient(135deg, var(--darker) 0%, #1a1f2e 100%);
-            color: var(--text-primary);
-            font-family: 'Poppins', sans-serif;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 20% 50%, rgba(0, 102, 255, 0.08) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 80%, rgba(255, 107, 53, 0.08) 0%, transparent 50%);
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .container-main { position: relative; z-index: 1; }
-
-        /* Header */
-        header {
-            background: rgba(15, 20, 25, 0.9);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--border);
-            padding: 1.5rem 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            max-width: 1800px;
-            margin: 0 auto;
-            flex-wrap: wrap;
-            gap: 2rem;
-        }
-
-        .logo {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.8rem;
-            font-weight: 700;
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-        }
-
-        .logo-icon {
-            width: 45px;
-            height: 45px;
-            border-radius: 12px;
-            background: var(--gradient-1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.6rem;
-            box-shadow: 0 8px 24px rgba(0, 102, 255, 0.3);
-        }
-
-        .header-stats {
-            display: flex;
-            gap: 2rem;
-            align-items: center;
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 1.6rem;
-            font-weight: 700;
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .stat-label { 
-            font-size: 0.7rem;
-            color: var(--text-tertiary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* Tabs */
-        .tab-container {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
-            background: rgba(26, 31, 46, 0.4);
-            padding: 0.7rem;
-            border-radius: 14px;
-            border: 1px solid var(--border);
-            overflow-x: auto;
-            flex-wrap: wrap;
-        }
-
-        .tab-btn {
-            background: transparent;
-            border: 2px solid transparent;
-            color: var(--text-secondary);
-            padding: 0.7rem 1.2rem;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            white-space: nowrap;
-        }
-
-        .tab-btn.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-            box-shadow: 0 8px 16px rgba(0, 102, 255, 0.3);
-        }
-
-        .tab-btn:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        /* Main Layout */
-        .main-wrapper {
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            gap: 2rem;
-            padding: 2rem;
-            max-width: 1800px;
-            margin: 0 auto;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            background: rgba(26, 31, 46, 0.6);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 1.5rem;
-            height: fit-content;
-            position: sticky;
-            top: 120px;
-            backdrop-filter: blur(10px);
-        }
-
-        .sidebar-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.2rem;
-            margin-bottom: 1.5rem;
-            color: var(--text-primary);
-        }
-
-        .module-btn {
-            width: 100%;
-            background: transparent;
-            border: 2px solid transparent;
-            color: var(--text-secondary);
-            padding: 1rem 1.2rem;
-            border-radius: 12px;
-            margin-bottom: 0.8rem;
-            cursor: pointer;
-            font-size: 0.95rem;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .module-btn:hover, .module-btn.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-            transform: translateX(8px);
-        }
-
-        /* Content Area */
-        .content-area {
-            min-height: 100vh;
-        }
-
-        .top-controls {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .search-box {
-            flex: 1;
-            min-width: 250px;
-            background: rgba(26, 31, 46, 0.6);
-            border: 2px solid var(--border);
-            color: var(--text-primary);
-            border-radius: 14px;
-            padding: 1rem 1.5rem;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .search-box:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: rgba(26, 31, 46, 0.9);
-            box-shadow: 0 0 20px rgba(0, 102, 255, 0.2);
-        }
-
-        .btn-primary, .btn-secondary {
-            padding: 1rem 1.5rem;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            font-family: 'Poppins', sans-serif;
-            border: none;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-primary {
-            background: var(--gradient-1);
-            color: white;
-            box-shadow: 0 8px 24px rgba(0, 102, 255, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(0, 102, 255, 0.4);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            border: 2px solid var(--border);
-            color: var(--text-primary);
-        }
-
-        .btn-secondary:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        /* Cards */
-        .concept-card {
-            background: rgba(26, 31, 46, 0.6);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 1.5rem;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-            animation: fadeInUp 0.6s ease-out both;
-        }
-
-        .concept-card:hover {
-            border-color: var(--primary);
-            background: rgba(26, 31, 46, 0.9);
-            transform: translateY(-8px);
-            box-shadow: 0 20px 50px rgba(0, 102, 255, 0.2);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1.5rem;
-        }
-
-        .card-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            flex: 1;
-        }
-
-        .card-meta {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 0.4rem 0.9rem;
-            border-radius: 8px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .badge-easy {
-            background: rgba(46, 204, 113, 0.2);
-            color: var(--success);
-            border: 1px solid var(--success);
-        }
-
-        .badge-medium {
-            background: rgba(243, 156, 18, 0.2);
-            color: var(--warning);
-            border: 1px solid var(--warning);
-        }
-
-        .badge-hard {
-            background: rgba(231, 76, 60, 0.2);
-            color: var(--danger);
-            border: 1px solid var(--danger);
-        }
-
-        .card-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .card-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            font-size: 1.1rem;
-            transition: all 0.2s ease;
-            padding: 0.5rem;
-        }
-
-        .card-btn:hover {
-            color: var(--accent);
-            transform: scale(1.2);
-        }
-
-        .card-content {
-            display: flex;
-            flex-direction: column;
-            gap: 1.2rem;
-        }
-
-        /* Content Sections */
-        .section {
-            margin-bottom: 1.5rem;
-        }
-
-        .section-title {
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: var(--primary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 0.7rem;
-        }
-
-        .section-text {
-            color: var(--text-secondary);
-            line-height: 1.7;
-            font-size: 0.95rem;
-        }
-
-        .key-points {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-        }
-
-        .key-points li {
-            color: var(--text-secondary);
-            padding-left: 1.8rem;
-            position: relative;
-            line-height: 1.6;
-            font-size: 0.9rem;
-        }
-
-        .key-points li::before {
-            content: '▶';
-            position: absolute;
-            left: 0;
-            color: var(--primary);
-            font-weight: 700;
-        }
-
-        /* Visual Aids */
-        .concept-visual {
-            background: linear-gradient(135deg, rgba(0, 102, 255, 0.1) 0%, rgba(0, 212, 255, 0.1) 100%);
-            border: 1px solid rgba(0, 102, 255, 0.3);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 1rem 0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .concept-icon {
-            font-size: 3rem;
-            opacity: 0.8;
-        }
-
-        .concept-text {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        /* Comparison Table */
-        .comparison-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1rem 0;
-            border-radius: 8px;
-            overflow: hidden;
-            background: rgba(26, 31, 46, 0.4);
-            border: 1px solid var(--border);
-        }
-
-        .comparison-table th {
-            background: var(--primary);
-            color: white;
-            padding: 1rem;
-            text-align: left;
-            font-weight: 700;
-            font-size: 0.85rem;
-        }
-
-        .comparison-table td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border);
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .comparison-table tr:hover {
-            background: rgba(0, 102, 255, 0.1);
-        }
-
-        /* Memory Aid Box */
-        .memory-aid {
-            background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(255, 163, 102, 0.1) 100%);
-            border-left: 4px solid var(--accent);
-            border-radius: 8px;
-            padding: 1.2rem;
-            margin: 1rem 0;
-        }
-
-        .memory-aid-title {
-            color: var(--accent);
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .memory-aid-text {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            line-height: 1.6;
-        }
-
-        /* Real World Example */
-        .example-box {
-            background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(39, 174, 96, 0.1) 100%);
-            border-left: 4px solid var(--success);
-            border-radius: 8px;
-            padding: 1.2rem;
-            margin: 1rem 0;
-        }
-
-        .example-title {
-            color: var(--success);
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .example-text {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            line-height: 1.6;
-        }
-
-        /* Interactive Quiz */
-        .quiz-box {
-            background: rgba(26, 31, 46, 0.6);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 1rem 0;
-        }
-
-        .quiz-question {
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 1rem;
-        }
-
-        .quiz-options {
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-        }
-
-        .quiz-option {
-            background: transparent;
-            border: 2px solid var(--border);
-            color: var(--text-secondary);
-            padding: 0.8rem 1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-align: left;
-        }
-
-        .quiz-option:hover {
-            border-color: var(--primary);
-            background: rgba(0, 102, 255, 0.1);
-        }
-
-        .quiz-option.selected {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        .quiz-option.correct {
-            background: var(--success);
-            color: white;
-            border-color: var(--success);
-        }
-
-        .quiz-option.incorrect {
-            background: var(--danger);
-            color: white;
-            border-color: var(--danger);
-        }
-
-        /* Mind Map */
-        .mindmap-container {
-            background: rgba(26, 31, 46, 0.4);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 1rem 0;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .mindmap-node {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem;
-            background: rgba(0, 102, 255, 0.1);
-            border-left: 3px solid var(--primary);
-            border-radius: 8px;
-        }
-
-        .mindmap-icon {
-            font-size: 1.5rem;
-            opacity: 0.8;
-        }
-
-        .mindmap-text {
-            color: var(--text-secondary);
-            flex: 1;
-        }
-
-        /* Stats */
-        .stats-dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, rgba(0, 102, 255, 0.1) 0%, rgba(0, 212, 255, 0.1) 100%);
-            border: 1px solid rgba(0, 102, 255, 0.2);
-            border-radius: 14px;
-            padding: 1.5rem;
-            text-align: center;
-        }
-
-        .stat-card.medium {
-            background: linear-gradient(135deg, rgba(243, 156, 18, 0.1) 0%, rgba(255, 163, 102, 0.1) 100%);
-            border-color: rgba(243, 156, 18, 0.2);
-        }
-
-        .stat-card.success {
-            background: linear-gradient(135deg, rgba(46, 204, 113, 0.1) 0%, rgba(39, 174, 96, 0.1) 100%);
-            border-color: rgba(46, 204, 113, 0.2);
-        }
-
-        .stat-number {
-            font-size: 2.2rem;
-            font-weight: 800;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-card.medium .stat-number { color: var(--warning); }
-        .stat-card.success .stat-number { color: var(--success); }
-
-        .stat-label {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-tertiary);
-            font-weight: 600;
-        }
-
-        /* Hidden Content (Quiz Mode) */
-        .hidden-content {
-            filter: blur(12px);
-            pointer-events: none;
-            opacity: 0.2;
-            user-select: none;
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(5px);
-            z-index: 2000;
-        }
-
-        .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: linear-gradient(135deg, #1a1f2e 0%, #232b3c 100%);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 2rem;
-            max-width: 700px;
-            width: 90%;
-            max-height: 85vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 1rem;
-        }
-
-        .modal-title {
-            font-size: 1.6rem;
-            font-weight: 700;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 1.8rem;
-            cursor: pointer;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            font-size: 0.95rem;
-        }
-
-        .form-input, .form-textarea {
-            width: 100%;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--border);
-            color: var(--text-primary);
-            padding: 0.9rem 1rem;
-            border-radius: 10px;
-            font-family: 'Poppins', sans-serif;
-            transition: all 0.2s ease;
-        }
-
-        .form-input:focus, .form-textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: rgba(0, 0, 0, 0.5);
-            box-shadow: 0 0 15px rgba(0, 102, 255, 0.2);
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 120px;
-            font-family: 'IBM Plex Mono', monospace;
-            font-size: 0.85rem;
-        }
-
-        /* Animations */
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-
-        .pulse {
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .main-wrapper {
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-                height: auto;
-                position: relative;
-                top: 0;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .main-wrapper {
-                padding: 1rem;
-            }
-
-            .header-content {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .header-stats {
-                width: 100%;
-                justify-content: space-around;
-                gap: 1rem;
-            }
-
-            .top-controls {
-                flex-direction: column;
-            }
-
-            .search-box {
-                width: 100%;
-            }
-
-            .concept-card {
-                padding: 1.5rem;
-            }
-
-            .card-title {
-                font-size: 1.1rem;
-            }
-
-            .concept-visual {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .tab-container {
-                gap: 0.3rem;
-            }
-
-            .tab-btn {
-                padding: 0.6rem 0.9rem;
-                font-size: 0.8rem;
-            }
-        }
-
-        /* Scrollbar */
-        ::-webkit-scrollbar {
-            width: 10px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--darker);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 5px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--primary);
+        .sidebar { background: var(--card-bg); height: 100vh; padding: 25px; border-right: 1px solid #334155; position: fixed; width: 280px; overflow-y: auto; z-index: 1000; }
+        .main-content { margin-left: 280px; padding: 40px; min-height: 100vh; }
+        
+        .module-btn { width: 100%; text-align: left; background: transparent; border: none; color: var(--text-dim); padding: 12px 15px; border-radius: 10px; margin-bottom: 8px; transition: 0.3s; }
+        .module-btn:hover, .module-btn.active { background: var(--sap-blue); color: white; }
+
+        .tech-card { background: var(--card-bg); border-radius: 15px; padding: 25px; margin-bottom: 20px; border-left: 5px solid var(--sap-gold); position: relative; }
+        .edit-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; color: var(--sap-blue); cursor: pointer; font-size: 1.2rem; }
+        
+        .hidden-answer { filter: blur(8px); opacity: 0.1; }
+        .search-box { background: #334155; border: 1px solid #475569; color: white; border-radius: 12px; padding: 12px 20px; width: 100%; }
+        
+        .modal-content { background: var(--card-bg); color: white; border: 1px solid #475569; }
+        .form-control { background: #334155; border: 1px solid #475569; color: white; }
+        .form-control:focus { background: #334155; color: white; border-color: var(--sap-gold); }
+
+        @media (max-width: 992px) { 
+            .sidebar { width: 100%; height: auto; position: relative; display: flex; overflow-x: auto; padding: 15px; }
+            .main-content { margin-left: 0; padding: 20px; }
+            .sidebar h4, .sidebar hr { display: none; }
         }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="header-content">
-        <div class="logo">
-            <div class="logo-icon">🧠</div>
-            SAP Master Academy Pro
-        </div>
-        <div class="header-stats">
-            <div class="stat-item">
-                <div class="stat-value" id="totalTopics">0</div>
-                <div class="stat-label">Topics</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="masteredCount">0</div>
-                <div class="stat-label">Mastered</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="totalTime">0h</div>
-                <div class="stat-label">Learned</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="nextReview">-</div>
-                <div class="stat-label">Next Review</div>
-            </div>
-        </div>
-    </div>
-</header>
-
-<div class="container-main">
-    <div class="main-wrapper">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-title">📚 Modules</div>
-            <div id="moduleNav"></div>
-        </aside>
-
-        <!-- Content -->
-        <main class="content-area">
-            <!-- View Tabs -->
-            <div class="tab-container">
-                <button class="tab-btn active" data-tab="learn">
-                    <i class="fas fa-book"></i> Learn
-                </button>
-                <button class="tab-btn" data-tab="visualize">
-                    <i class="fas fa-chart-line"></i> Visualize
-                </button>
-                <button class="tab-btn" data-tab="quiz">
-                    <i class="fas fa-question-circle"></i> Quiz
-                </button>
-                <button class="tab-btn" data-tab="recall">
-                    <i class="fas fa-lightbulb"></i> Recall
-                </button>
-                <button class="tab-btn" data-tab="compare">
-                    <i class="fas fa-exchange-alt"></i> Compare
-                </button>
-            </div>
-
-            <!-- Top Controls -->
-            <div class="top-controls">
-                <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search concepts..." onkeyup="searchConcepts()">
-                <button class="btn-primary" onclick="openEditModal(null)">
-                    <i class="fas fa-plus"></i> Add Topic
-                </button>
-            </div>
-
-            <!-- Stats Dashboard -->
-            <div class="stats-dashboard">
-                <div class="stat-card">
-                    <div class="stat-number" id="todayLearned">0</div>
-                    <div class="stat-label">Learned Today</div>
-                </div>
-                <div class="stat-card medium">
-                    <div class="stat-number" id="reviewDue">0</div>
-                    <div class="stat-label">Review Due</div>
-                </div>
-                <div class="stat-card success">
-                    <div class="stat-number" id="successRate">0%</div>
-                    <div class="stat-label">Success Rate</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="streak">0</div>
-                    <div class="stat-label">Day Streak</div>
-                </div>
-            </div>
-
-            <!-- Content Area -->
-            <div id="content-area"></div>
-        </main>
-    </div>
+<div class="sidebar" id="sidebar">
+    <h4 class="text-warning mb-4">SAP Library ✏️</h4>
+    <div id="moduleNav"></div>
 </div>
 
-<!-- Edit Modal -->
-<div class="modal" id="editModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2 class="modal-title">Create/Edit Concept</h2>
-            <button class="modal-close" onclick="closeEditModal()">&times;</button>
-        </div>
-        <div>
-            <input type="hidden" id="editIndex">
-            
-            <div class="form-group">
-                <label class="form-label">Concept Name</label>
-                <input type="text" id="editName" class="form-input" placeholder="e.g., What is an Analytic Model?">
-            </div>
+<div class="main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4 gap-3">
+        <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search topics..." onkeyup="searchTech()">
+        <button class="btn btn-warning fw-bold px-4" onclick="openEditModal(null)">➕ Add Topic</button>
+    </div>
 
-            <div class="form-group">
-                <label class="form-label">Simple Definition (Core Idea)</label>
-                <textarea id="editDef" class="form-textarea" placeholder="Write a simple, memorable definition..."></textarea>
-            </div>
+    <div class="form-check form-switch mb-4">
+        <input class="form-check-input" type="checkbox" id="quizSwitch" onchange="toggleQuizMode()">
+        <label class="form-check-label small fw-bold" for="quizSwitch">QUIZ MODE (Click cards to reveal)</label>
+    </div>
 
-            <div class="form-group">
-                <label class="form-label">Key Points</label>
-                <textarea id="editList" class="form-textarea" placeholder="Key point 1...&#10;Key point 2..."></textarea>
-            </div>
+    <div id="content-area"></div>
+</div>
 
-            <div class="form-group">
-                <label class="form-label">Memory Aid (Memorable Story/Phrase)</label>
-                <textarea id="editMnemonic" class="form-textarea" placeholder="Create a memorable phrase or story..."></textarea>
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title">Edit Technical Topic</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-
-            <div class="form-group">
-                <label class="form-label">Real World Example</label>
-                <textarea id="editExample" class="form-textarea" placeholder="Show how this works in real situations..."></textarea>
+            <div class="modal-body">
+                <input type="hidden" id="editIndex">
+                <div class="mb-3">
+                    <label class="form-label text-warning">Topic / Question</label>
+                    <input type="text" id="editName" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-warning">Definition / Answer</label>
+                    <textarea id="editDef" class="form-control" rows="4"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-warning">Bullet Points (One per line)</label>
+                    <textarea id="editList" class="form-control" rows="4" placeholder="Step 1...&#10;Step 2..."></textarea>
+                </div>
             </div>
-
-            <div class="form-group">
-                <label class="form-label">Difficulty</label>
-                <select id="editDifficulty" class="form-input" style="cursor: pointer;">
-                    <option value="easy">Easy</option>
-                    <option value="medium" selected>Medium</option>
-                    <option value="hard">Hard</option>
-                </select>
-            </div>
-
-            <div style="display: flex; gap: 1rem;">
-                <button class="btn-secondary" onclick="closeEditModal()">Cancel</button>
-                <button class="btn-primary" onclick="saveTopic()">Save Topic</button>
+            <div class="modal-footer border-secondary">
+                <button class="btn btn-danger me-auto" onclick="deleteTopic()">Delete Topic</button>
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-primary" onclick="saveTopic()">Save Changes</button>
             </div>
         </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Enhanced Data Structure
+    // Initial Data
     const defaultData = {
-        datasphere: {
-            title: "🌐 Datasphere",
-            emoji: "🌐",
-            items: [
-                {
-                    name: "Analytic Model ⭐",
-                    def: "Multi-dimensional model designed for business analytics in SAP Analytics Cloud.",
-                    list: ["Source: Fact Views", "Contains Dimensions, Measures, Variables", "Replaced Analytical Dataset (now legacy)", "PRIMARY object for analytics"],
-                    mnemonic: "Think: ANALYTIC = ANALyze Like In Tableau (data-driven decisions)",
-                    example: "Sales Analytic Model: Shows revenue by region, product, time - drill down from global to store level",
-                    difficulty: "medium",
-                    lastReview: null,
-                    nextReview: new Date(),
-                    reviewCount: 0
-                },
-                {
-                    name: "Fact View",
-                    def: "View containing transactional/measures data - the data facts you want to analyze.",
-                    list: ["Must have measures (numbers)", "Associates with Dimensions", "Source for Analytic Models"],
-                    mnemonic: "FACT = Factual/numbers/measures. Dimensions are descriptive, Facts are numerical",
-                    example: "Sales Fact View: Contains transaction amounts, quantities, dates - raw sales data",
-                    difficulty: "easy",
-                    lastReview: null,
-                    nextReview: new Date(),
-                    reviewCount: 0
-                },
-                {
-                    name: "Dimension View",
-                    def: "View with master data attributes and hierarchies - the context/labels for facts.",
-                    list: ["Key Attribute: Unique ID", "Text Attributes: Descriptions", "Hierarchies: Drill-down paths"],
-                    mnemonic: "DIMENSION = Descriptive context. Fact: WHAT (numbers), Dimension: WHO/WHERE/WHEN",
-                    example: "Product Dimension: Contains product ID, name, category, subcategory hierarchy",
-                    difficulty: "easy",
-                    lastReview: null,
-                    nextReview: new Date(),
-                    reviewCount: 0
-                },
-                {
-                    name: "Graphical View",
-                    def: "Visual, drag-drop tool to transform data without coding.",
-                    list: ["Operations: Join, Filter, Aggregate, Union", "No-code interface", "Manually deployed"],
-                    mnemonic: "GRAPHICAL = Visual blocks/components. Like building with LEGO (no coding needed)",
-                    example: "Join sales data + customer data to show customer spending patterns",
-                    difficulty: "medium",
-                    lastReview: null,
-                    nextReview: new Date(),
-                    reviewCount: 0
-                },
-                {
-                    name: "Replication Flow",
-                    def: "Automatic data copying from source system with delta support (ELT approach).",
-                    list: ["ELT: Load first, transform later", "Supports initial + delta loads", "Highly efficient for large data"],
-                    mnemonic: "REPLICATION = Replica/copy. Like xerox machine - just copy, don't modify",
-                    example: "Copy customer master data from S/4HANA to Datasphere nightly",
-                    difficulty: "medium",
-                    lastReview: null,
-                    nextReview: new Date(),
-                    reviewCount: 0
-                }
-            ]
-        },
-        bw: {
-            title: "🔷 SAP BW",
-            emoji: "🔷",
-            items: [
-                {
-                    name: "InfoObject",
-                    def: "Reusable component - either a characteristic (dimension) or key figure (measure).",
-                    list: ["Characteristic: Customer, Product, Time", "Key Figure: Revenue, Quantity, Cost"],
-                    mnemonic: "INFO-Object = Information object. Building blocks of BW (like atoms of data)",
-                    example: "Customer (Characteristic) + Revenue (Key Figure) = What did customer buy & for how much",
-                    difficulty: "easy",
-                    lastReview: null,
-                    nextReview: new Date(),
-                    reviewCount: 0
-                },
-                {
-                    name: "InfoCube",
-                    def: "Star-schema database combining fact data with dimension descriptors.",
-                    list: ["Characteristics + Key Figures", "Star-schema physical structure", "Basis for all BEx queries"],
-                    mnemonic: "CUBE = 3D shape. Fact in center, dimensions around it (like a data cube)",
-                    example: "Sales InfoCube: Revenue fact + Customer, Product, Time, Geography dimensions",
-                    difficulty: "medium",
-                    lastReview: null,
-                    nextReview: new Date(),
-                    reviewCount: 0
-                }
-            ]
-        },
-        sac: {
-            title: "📊 SAC Analytics",
-            emoji: "📊",
-            items: [
-                {
-                    name: "Story",
-                    def: "Interactive dashboard combining charts, tables, and visualizations on canvas pages.",
-                    list: ["Multiple pages", "Interactive charts", "Drill-down capability", "Connected to models"],
-                    mnemonic: "STORY = Tell data story. Like a comic book - visual pages that tell a narrative",
-                    example: "Sales Story: Page 1 = Global overview, Page 2 = Regional drill-down, Page 3 = Product trends",
-                    difficulty: "easy",
-                    lastReview: null,
-                    nextReview: new Date(),
-                    reviewCount: 0
-                }
-            ]
-        }
+        bw: { title: "SAP BW", items: [{ name: "InfoObject", def: "Foundation of BW.", list: ["Char","Key Figure"] }] },
+        datasphere: { title: "Datasphere", items: [{ name: "Spaces", def: "Work environments." }] },
+        sac: { title: "SAC", items: [{ name: "Stories", def: "Visualizations." }] },
+        hana: { title: "HANA", items: [{ name: "Views", def: "Modeling tool." }] },
+        bo: { title: "BO/WebI", items: [{ name: "Universe", def: "Semantic layer." }] }
     };
 
-    // Global State
-    let sapData = JSON.parse(localStorage.getItem('sapData')) || JSON.parse(JSON.stringify(defaultData));
-    let currentModule = "datasphere";
-    let currentTab = "learn";
-    let sessionTime = 0;
-    let viewedCards = new Set(JSON.parse(localStorage.getItem('viewedCards')) || []);
-    let masteredCards = new Set(JSON.parse(localStorage.getItem('masteredCards')) || []);
+    let sapData = JSON.parse(localStorage.getItem('sapData')) || defaultData;
+    let currentModule = "bw";
+    let isQuizMode = false;
+    const editModal = new bootstrap.Modal(document.getElementById('editModal'));
 
-    // Initialize
     function init() {
-        // Module Navigation
         const nav = document.getElementById('moduleNav');
         nav.innerHTML = "";
         Object.keys(sapData).forEach((key) => {
             const btn = document.createElement('button');
             btn.className = `module-btn ${key === currentModule ? 'active' : ''}`;
-            btn.innerHTML = `${sapData[key].emoji} ${sapData[key].title}`;
+            btn.innerText = sapData[key].title;
             btn.onclick = () => { currentModule = key; init(); render(); };
             nav.appendChild(btn);
         });
-
-        // Tab Navigation
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.remove('active');
-            btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                e.target.closest('.tab-btn').classList.add('active');
-                currentTab = e.target.closest('.tab-btn').dataset.tab;
-                render();
-            });
-        });
-        document.querySelector('[data-tab="learn"]').classList.add('active');
-
-        updateStats();
         render();
     }
 
     function render() {
         const data = sapData[currentModule];
-        let html = `
-            <div style="margin-bottom: 2rem; animation: fadeInUp 0.6s ease-out;">
-                <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem;">
-                    ${data.emoji} ${data.title}
-                </h1>
-                <p style="color: var(--text-secondary); font-size: 1rem;">Master ${data.items.length} critical concepts with interactive learning</p>
-            </div>
-        `;
-
+        let html = `<h2 class="text-warning mb-4">${data.title}</h2>`;
         data.items.forEach((item, idx) => {
-            const difficulty = item.difficulty || 'medium';
-            const badge = `badge-${difficulty}`;
-            const key = `${currentModule}-${idx}`;
-            const isViewed = viewedCards.has(key);
-            const isMastered = masteredCards.has(key);
-
-            if (currentTab === 'learn') {
-                html += renderLearnTab(item, idx, difficulty, badge, key, isViewed, isMastered);
-            } else if (currentTab === 'visualize') {
-                html += renderVisualizeTab(item, idx);
-            } else if (currentTab === 'quiz') {
-                html += renderQuizTab(item, idx, key);
-            } else if (currentTab === 'recall') {
-                html += renderRecallTab(item, idx, key);
-            } else if (currentTab === 'compare') {
-                html += renderCompareTab(item, idx);
-            }
+            html += `
+                <div class="tech-card" onclick="revealAnswer(this)">
+                    <button class="edit-btn" onclick="event.stopPropagation(); openEditModal(${idx})">✏️</button>
+                    <h5 class="text-info">Q: ${item.name}</h5>
+                    <div class="answer-area ${isQuizMode ? 'hidden-answer' : ''}">
+                        <p>${item.def}</p>
+                        ${item.list ? `<ul>${item.list.map(l => `<li>${l}</li>`).join('')}</ul>` : ''}
+                    </div>
+                </div>`;
         });
-
         document.getElementById('content-area').innerHTML = html;
-    }
-
-    function renderLearnTab(item, idx, difficulty, badge, key, isViewed, isMastered) {
-        return `
-            <div class="concept-card" style="animation-delay: ${idx * 0.05}s;">
-                <div class="card-header">
-                    <div>
-                        <h3 class="card-title">${item.name}</h3>
-                        <div class="card-meta">
-                            <span class="badge ${badge}">${difficulty}</span>
-                            ${isMastered ? '<span class="badge" style="background: var(--success); color: white; border: none;"><i class="fas fa-crown"></i> Mastered</span>' : ''}
-                        </div>
-                    </div>
-                    <div class="card-actions">
-                        <button class="card-btn" onclick="toggleMastered(${idx}, '${currentModule}')" title="Mark as mastered">
-                            <i class="fas ${isMastered ? 'fa-star' : 'fa-star-o'}"></i>
-                        </button>
-                        <button class="card-btn" onclick="openEditModal(${idx})" title="Edit">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="card-content">
-                    <!-- Simple Definition -->
-                    <div class="section">
-                        <div class="section-title">💡 Core Idea</div>
-                        <p class="section-text">${item.def}</p>
-                    </div>
-
-                    <!-- Concept Visual -->
-                    <div class="concept-visual">
-                        <div class="concept-icon">📚</div>
-                        <div class="concept-text">
-                            <strong style="color: var(--text-primary);">Quick Overview</strong><br>
-                            <p style="margin-top: 0.5rem;">${item.list[0] || 'Key concept'}</p>
-                        </div>
-                    </div>
-
-                    <!-- Key Points -->
-                    <div class="section">
-                        <div class="section-title">🎯 Key Points</div>
-                        <ul class="key-points">
-                            ${(item.list || []).map(point => `<li>${point}</li>`).join('')}
-                        </ul>
-                    </div>
-
-                    <!-- Memory Aid -->
-                    <div class="memory-aid">
-                        <div class="memory-aid-title">
-                            <i class="fas fa-brain"></i> Memory Aid
-                        </div>
-                        <div class="memory-aid-text">${item.mnemonic || 'Create a memorable phrase...'}</div>
-                    </div>
-
-                    <!-- Real World Example -->
-                    <div class="example-box">
-                        <div class="example-title">
-                            <i class="fas fa-lightbulb"></i> Real World Example
-                        </div>
-                        <div class="example-text">${item.example || 'See how this works in practice...'}</div>
-                    </div>
-
-                    <!-- Mind Map -->
-                    <div class="section">
-                        <div class="section-title">🗺️ Concept Map</div>
-                        <div class="mindmap-container">
-                            <div class="mindmap-node">
-                                <div class="mindmap-icon">🎓</div>
-                                <div class="mindmap-text"><strong>What is it?</strong> ${item.def.substring(0, 50)}...</div>
-                            </div>
-                            <div class="mindmap-node">
-                                <div class="mindmap-icon">🔑</div>
-                                <div class="mindmap-text"><strong>Key Feature:</strong> ${item.list[0] || 'Essential component'}</div>
-                            </div>
-                            <div class="mindmap-node">
-                                <div class="mindmap-icon">💡</div>
-                                <div class="mindmap-text"><strong>Remember:</strong> ${item.mnemonic.substring(0, 40)}...</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    function renderVisualizeTab(item, idx) {
-        return `
-            <div class="concept-card" style="animation-delay: ${idx * 0.05}s;">
-                <h3 class="card-title">${item.name} - Visual Breakdown</h3>
-                
-                <div style="margin-top: 1.5rem;">
-                    <svg viewBox="0 0 400 300" style="width: 100%; max-height: 300px; border-radius: 12px; background: rgba(0, 102, 255, 0.05);">
-                        <!-- Central Concept -->
-                        <circle cx="200" cy="150" r="40" fill="#0066ff" opacity="0.7"/>
-                        <text x="200" y="155" text-anchor="middle" fill="white" font-weight="bold" font-size="12">${item.name.substring(0, 8)}</text>
-                        
-                        <!-- Key Points -->
-                        ${item.list.map((point, i) => {
-                            const angle = (i / item.list.length) * Math.PI * 2;
-                            const x = 200 + Math.cos(angle) * 120;
-                            const y = 150 + Math.sin(angle) * 120;
-                            return `
-                                <circle cx="${x}" cy="${y}" r="30" fill="#ff6b35" opacity="0.5"/>
-                                <text x="${x}" y="${y + 5}" text-anchor="middle" fill="white" font-size="10" font-weight="bold">${point.substring(0, 6)}</text>
-                                <line x1="200" y1="150" x2="${x}" y2="${y}" stroke="rgba(255, 255, 255, 0.3)" stroke-width="1"/>
-                            `;
-                        }).join('')}
-                    </svg>
-                    <p style="text-align: center; color: var(--text-tertiary); margin-top: 1rem; font-size: 0.9rem;">
-                        Central concept with key components and relationships
-                    </p>
-                </div>
-            </div>
-        `;
-    }
-
-    function renderQuizTab(item, idx, key) {
-        return `
-            <div class="concept-card" style="animation-delay: ${idx * 0.05}s;">
-                <h3 class="card-title">🎯 Quick Quiz: ${item.name}</h3>
-                
-                <div class="quiz-box" style="margin-top: 1.5rem;">
-                    <div class="quiz-question">What is the core idea?</div>
-                    <div class="quiz-options">
-                        <button class="quiz-option" onclick="this.classList.add('selected'); setTimeout(() => this.classList.remove('selected'), 1000)">
-                            ${item.def.substring(0, 60)}...
-                        </button>
-                        <button class="quiz-option" onclick="this.classList.add('selected'); setTimeout(() => this.classList.remove('selected'), 1000)">
-                            Alternative concept
-                        </button>
-                        <button class="quiz-option" onclick="this.classList.add('selected'); setTimeout(() => this.classList.remove('selected'), 1000)">
-                            Related concept
-                        </button>
-                    </div>
-                    <p style="margin-top: 1rem; color: var(--success); font-size: 0.9rem;">
-                        <i class="fas fa-lightbulb"></i> Hint: Focus on "${item.mnemonic.substring(0, 20)}..."
-                    </p>
-                </div>
-
-                <div class="example-box" style="margin-top: 1.5rem;">
-                    <div class="example-title">Try to Recall:</div>
-                    <div class="example-text">Can you explain this concept without looking at the definition?</div>
-                </div>
-            </div>
-        `;
-    }
-
-    function renderRecallTab(item, idx, key) {
-        return `
-            <div class="concept-card" style="animation-delay: ${idx * 0.05}s;">
-                <h3 class="card-title">🧠 Recall Test: ${item.name}</h3>
-                
-                <div class="memory-aid" style="margin-top: 1.5rem;">
-                    <div class="memory-aid-title">
-                        <i class="fas fa-eye-slash"></i> Cover the Answer & Recall
-                    </div>
-                    <div class="memory-aid-text" style="user-select: none; -webkit-user-select: none;">
-                        Try to remember what you learned before revealing the answer!
-                    </div>
-                </div>
-
-                <div style="background: rgba(26, 31, 46, 0.6); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-top: 1rem;">
-                    <div style="color: var(--text-tertiary); margin-bottom: 1rem; font-size: 0.9rem;">DEFINITION (Hidden)</div>
-                    <div class="hidden-content" id="recall-${idx}">
-                        <p style="margin-bottom: 0.8rem;"><strong>Definition:</strong> ${item.def}</p>
-                        <p style="margin-bottom: 0.8rem;"><strong>Memory Aid:</strong> ${item.mnemonic}</p>
-                        <p><strong>Example:</strong> ${item.example}</p>
-                    </div>
-                    <button class="btn-primary" onclick="revealRecall(${idx})" style="width: 100%; margin-top: 1rem;">
-                        <i class="fas fa-eye"></i> Reveal Answer
-                    </button>
-                </div>
-            </div>
-        `;
-    }
-
-    function renderCompareTab(item, idx) {
-        return `
-            <div class="concept-card" style="animation-delay: ${idx * 0.05}s;">
-                <h3 class="card-title">🔄 Compare & Contrast: ${item.name}</h3>
-                
-                <table class="comparison-table" style="margin-top: 1.5rem;">
-                    <thead>
-                        <tr>
-                            <th>Aspect</th>
-                            <th>${item.name}</th>
-                            <th>Related Concept</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>Purpose</strong></td>
-                            <td>${item.def.substring(0, 40)}...</td>
-                            <td>Compare with related objects</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Key Use</strong></td>
-                            <td>${item.list[0] || 'Primary function'}</td>
-                            <td>Similar but different purpose</td>
-                        </tr>
-                        <tr>
-                            <td><strong>When to Use</strong></td>
-                            <td>Primary scenario</td>
-                            <td>Alternative scenario</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        `;
-    }
-
-    function revealRecall(idx) {
-        const element = document.getElementById(`recall-${idx}`);
-        element.classList.toggle('hidden-content');
-        event.target.textContent = element.classList.contains('hidden-content') ? '👁️ Show Answer' : '👁️ Hide Answer';
     }
 
     function openEditModal(idx) {
         document.getElementById('editIndex').value = idx === null ? "" : idx;
-        
         if (idx !== null) {
             const item = sapData[currentModule].items[idx];
             document.getElementById('editName').value = item.name;
             document.getElementById('editDef').value = item.def;
             document.getElementById('editList').value = item.list ? item.list.join('\n') : "";
-            document.getElementById('editMnemonic').value = item.mnemonic || "";
-            document.getElementById('editExample').value = item.example || "";
-            document.getElementById('editDifficulty').value = item.difficulty || 'medium';
         } else {
             document.getElementById('editName').value = "";
             document.getElementById('editDef').value = "";
             document.getElementById('editList').value = "";
-            document.getElementById('editMnemonic').value = "";
-            document.getElementById('editExample').value = "";
-            document.getElementById('editDifficulty').value = "medium";
         }
-        document.getElementById('editModal').classList.add('active');
-    }
-
-    function closeEditModal() {
-        document.getElementById('editModal').classList.remove('active');
+        editModal.show();
     }
 
     function saveTopic() {
         const idx = document.getElementById('editIndex').value;
         const newItem = {
-            name: document.getElementById('editName').value || "Untitled",
-            def: document.getElementById('editDef').value || "",
-            list: document.getElementById('editList').value.split('\n').filter(l => l.trim() !== ""),
-            mnemonic: document.getElementById('editMnemonic').value || "",
-            example: document.getElementById('editExample').value || "",
-            difficulty: document.getElementById('editDifficulty').value || "medium",
-            lastReview: idx === "" ? null : sapData[currentModule].items[idx]?.lastReview || null,
-            nextReview: new Date(),
-            reviewCount: idx === "" ? 0 : sapData[currentModule].items[idx]?.reviewCount || 0
+            name: document.getElementById('editName').value,
+            def: document.getElementById('editDef').value,
+            list: document.getElementById('editList').value.split('\n').filter(l => l.trim() !== "")
         };
 
-        if (idx === "") {
-            sapData[currentModule].items.push(newItem);
-        } else {
-            sapData[currentModule].items[idx] = newItem;
-        }
+        if (idx === "") sapData[currentModule].items.push(newItem);
+        else sapData[currentModule].items[idx] = newItem;
 
         localStorage.setItem('sapData', JSON.stringify(sapData));
-        closeEditModal();
-        init();
-    }
-
-    function toggleMastered(idx, module) {
-        const key = `${module}-${idx}`;
-        if (masteredCards.has(key)) {
-            masteredCards.delete(key);
-        } else {
-            masteredCards.add(key);
-            sapData[module].items[idx].lastReview = new Date();
-            sapData[module].items[idx].reviewCount = (sapData[module].items[idx].reviewCount || 0) + 1;
-            localStorage.setItem('sapData', JSON.stringify(sapData));
-        }
-        localStorage.setItem('masteredCards', JSON.stringify([...masteredCards]));
-        updateStats();
+        editModal.hide();
         render();
     }
 
-    function searchConcepts() {
-        const term = document.getElementById('searchInput').value.toLowerCase();
-        const cards = document.querySelectorAll('.concept-card');
-        cards.forEach(card => {
-            const matches = card.innerText.toLowerCase().includes(term);
-            card.style.display = matches ? "" : "none";
-        });
-    }
-
-    function updateStats() {
-        const totalTopics = Object.values(sapData).reduce((sum, m) => sum + m.items.length, 0);
-        document.getElementById('totalTopics').textContent = totalTopics;
-        document.getElementById('masteredCount').textContent = masteredCards.size;
-        document.getElementById('totalTime').textContent = Math.floor(sessionTime / 3600) + 'h';
-        document.getElementById('todayLearned').textContent = viewedCards.size;
-        document.getElementById('reviewDue').textContent = masteredCards.size > 0 ? '3-5' : '0';
-        document.getElementById('successRate').textContent = totalTopics > 0 ? Math.round((masteredCards.size / totalTopics) * 100) : '0' + '%';
-        document.getElementById('streak').textContent = masteredCards.size > 5 ? '🔥 ' + Math.floor(masteredCards.size / 5) : '0';
-    }
-
-    // Session Timer
-    setInterval(() => {
-        sessionTime++;
-        updateStats();
-    }, 1000);
-
-    // Close modal on outside click
-    document.addEventListener('click', (e) => {
-        if (e.target.id === 'editModal') {
-            closeEditModal();
+    function deleteTopic() {
+        const idx = document.getElementById('editIndex').value;
+        if (idx !== "" && confirm("Delete this topic?")) {
+            sapData[currentModule].items.splice(idx, 1);
+            localStorage.setItem('sapData', JSON.stringify(sapData));
+            editModal.hide();
+            render();
         }
-    });
+    }
 
-    // Initialize
+    function toggleQuizMode() { isQuizMode = document.getElementById('quizSwitch').checked; render(); }
+    function revealAnswer(card) { if(isQuizMode) card.querySelector('.answer-area').classList.toggle('hidden-answer'); }
+    function searchTech() {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        const cards = document.getElementsByClassName('tech-card');
+        for (let card of cards) card.style.display = card.innerText.toLowerCase().includes(term) ? "" : "none";
+    }
+
     init();
 </script>
-
 </body>
 </html>
