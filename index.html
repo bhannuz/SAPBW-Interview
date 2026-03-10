@@ -16,8 +16,8 @@
         .module-btn:hover, .module-btn.active { background: var(--sap-blue); color: white; }
 
         .tech-card { background: var(--card-bg); border-radius: 15px; padding: 25px; margin-bottom: 20px; border-left: 5px solid var(--sap-gold); position: relative; cursor: pointer; transition: 0.3s; }
-        .tech-card:hover { transform: translateX(5px); }
-        .edit-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; color: var(--sap-blue); cursor: pointer; font-size: 1.2rem; }
+        .tech-card:hover { transform: translateX(5px); box-shadow: 0 0 20px rgba(0, 112, 210, 0.3); }
+        .edit-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; color: var(--sap-blue); cursor: pointer; font-size: 1.2rem; z-index: 10; }
         .edit-btn:hover { color: var(--sap-gold); }
         
         .hidden-answer { filter: blur(8px); opacity: 0.1; }
@@ -31,10 +31,171 @@
         .badge-category { background: var(--sap-blue); padding: 5px 10px; border-radius: 5px; font-size: 0.75rem; margin-right: 5px; }
         .quiz-indicator { font-size: 0.9rem; color: var(--text-dim); margin-top: 10px; font-style: italic; }
 
+        /* Topic Popup Modal */
+        .topic-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .topic-popup.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .topic-popup-content {
+            background: var(--card-bg);
+            border: 2px solid var(--sap-gold);
+            border-radius: 20px;
+            padding: 35px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .popup-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: var(--sap-gold);
+            font-size: 2rem;
+            cursor: pointer;
+            transition: 0.2s;
+            line-height: 1;
+        }
+
+        .popup-close:hover {
+            color: #ff6b35;
+            transform: scale(1.2);
+        }
+
+        .popup-title {
+            color: var(--sap-gold);
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--sap-gold);
+            padding-bottom: 15px;
+        }
+
+        .popup-definition {
+            background: rgba(0, 112, 210, 0.1);
+            border-left: 4px solid var(--sap-gold);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .popup-points-title {
+            color: var(--sap-gold);
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+
+        .popup-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .popup-list li {
+            padding: 10px 0;
+            padding-left: 25px;
+            position: relative;
+            color: var(--text-dim);
+            line-height: 1.5;
+        }
+
+        .popup-list li:before {
+            content: "▸";
+            position: absolute;
+            left: 0;
+            color: var(--sap-gold);
+            font-size: 1.2rem;
+        }
+
+        .popup-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #334155;
+        }
+
+        .popup-actions button {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .popup-edit-btn {
+            background: var(--sap-blue);
+            color: white;
+        }
+
+        .popup-edit-btn:hover {
+            background: #0052a3;
+            transform: translateY(-2px);
+        }
+
+        .popup-close-btn {
+            background: #334155;
+            color: var(--text-main);
+        }
+
+        .popup-close-btn:hover {
+            background: #475569;
+            transform: translateY(-2px);
+        }
+
         @media (max-width: 992px) { 
             .sidebar { width: 100%; height: auto; position: relative; display: flex; overflow-x: auto; padding: 15px; }
             .main-content { margin-left: 0; padding: 20px; }
             .sidebar h4, .sidebar hr { display: none; }
+
+            .topic-popup-content {
+                padding: 25px;
+                margin: 20px;
+            }
+
+            .popup-title {
+                font-size: 1.4rem;
+            }
         }
     </style>
 </head>
@@ -53,12 +214,28 @@
 
     <div class="form-check form-switch mb-4">
         <input class="form-check-input" type="checkbox" id="quizSwitch" onchange="toggleQuizMode()">
-        <label class="form-check-label small fw-bold" for="quizSwitch">🎯 QUIZ MODE (Click cards to reveal answers)</label>
+        <label class="form-check-label small fw-bold" for="quizSwitch">🎯 QUIZ MODE</label>
     </div>
 
     <div id="content-area"></div>
 </div>
 
+<!-- Topic Popup Modal -->
+<div class="topic-popup" id="topicPopup">
+    <div class="topic-popup-content">
+        <button class="popup-close" onclick="closeTopicPopup()">×</button>
+        <div class="popup-title" id="popupTitle">Topic Name</div>
+        <div class="popup-definition" id="popupDefinition">Definition text here</div>
+        <div class="popup-points-title">Key Points:</div>
+        <ul class="popup-list" id="popupList"></ul>
+        <div class="popup-actions">
+            <button class="popup-edit-btn" onclick="editFromPopup()">✏️ Edit Topic</button>
+            <button class="popup-close-btn" onclick="closeTopicPopup()">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
 <div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -156,6 +333,7 @@
     let sapData = JSON.parse(localStorage.getItem('sapData')) || defaultData;
     let currentModule = "datasphere";
     let isQuizMode = false;
+    let currentPopupIndex = null;
     const editModal = new bootstrap.Modal(document.getElementById('editModal'));
 
     function init() {
@@ -176,17 +354,39 @@
         let html = `<h2 class="text-warning mb-4">📖 ${data.title}</h2>`;
         data.items.forEach((item, idx) => {
             html += `
-                <div class="tech-card" onclick="revealAnswer(this)">
+                <div class="tech-card" onclick="openTopicPopup(${idx})">
                     <button class="edit-btn" onclick="event.stopPropagation(); openEditModal(${idx})" title="Edit">✏️</button>
                     <h5 class="text-info">Q: ${item.name}</h5>
-                    <div class="answer-area ${isQuizMode ? 'hidden-answer' : ''}">
-                        <p><strong>A:</strong> ${item.def}</p>
-                        ${item.list && item.list.length > 0 ? `<ul class="mb-0">${item.list.map(l => `<li>${l}</li>`).join('')}</ul>` : ''}
-                        <div class="quiz-indicator">💡 Click to reveal in quiz mode</div>
-                    </div>
+                    <p style="margin-bottom: 0; color: var(--text-dim); font-size: 0.9rem;">Click to view details →</p>
                 </div>`;
         });
         document.getElementById('content-area').innerHTML = html;
+    }
+
+    function openTopicPopup(idx) {
+        currentPopupIndex = idx;
+        const item = sapData[currentModule].items[idx];
+        
+        document.getElementById('popupTitle').innerText = item.name;
+        document.getElementById('popupDefinition').innerText = item.def;
+        
+        const listHtml = item.list && item.list.length > 0 
+            ? item.list.map(point => `<li>${point}</li>`).join('')
+            : '<li>No additional points</li>';
+        
+        document.getElementById('popupList').innerHTML = listHtml;
+        
+        document.getElementById('topicPopup').classList.add('show');
+    }
+
+    function closeTopicPopup() {
+        document.getElementById('topicPopup').classList.remove('show');
+        currentPopupIndex = null;
+    }
+
+    function editFromPopup() {
+        closeTopicPopup();
+        openEditModal(currentPopupIndex);
     }
 
     function openEditModal(idx) {
@@ -235,13 +435,6 @@
         render(); 
     }
 
-    function revealAnswer(card) { 
-        if(isQuizMode) {
-            const answerArea = card.querySelector('.answer-area');
-            answerArea.classList.toggle('hidden-answer');
-        }
-    }
-
     function searchTech() {
         const term = document.getElementById('searchInput').value.toLowerCase();
         const cards = document.getElementsByClassName('tech-card');
@@ -250,6 +443,20 @@
             card.style.display = matches ? "" : "none";
         }
     }
+
+    // Close popup when clicking outside
+    document.getElementById('topicPopup').addEventListener('click', function(event) {
+        if (event.target === this) {
+            closeTopicPopup();
+        }
+    });
+
+    // Close popup with Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            closeTopicPopup();
+        }
+    });
 
     init();
 </script>
