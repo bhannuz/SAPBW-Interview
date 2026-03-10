@@ -15,15 +15,21 @@
         .module-btn { width: 100%; text-align: left; background: transparent; border: none; color: var(--text-dim); padding: 12px 15px; border-radius: 10px; margin-bottom: 8px; transition: 0.3s; }
         .module-btn:hover, .module-btn.active { background: var(--sap-blue); color: white; }
 
-        .tech-card { background: var(--card-bg); border-radius: 15px; padding: 25px; margin-bottom: 20px; border-left: 5px solid var(--sap-gold); position: relative; }
+        .tech-card { background: var(--card-bg); border-radius: 15px; padding: 25px; margin-bottom: 20px; border-left: 5px solid var(--sap-gold); position: relative; cursor: pointer; transition: 0.3s; }
+        .tech-card:hover { transform: translateX(5px); }
         .edit-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; color: var(--sap-blue); cursor: pointer; font-size: 1.2rem; }
+        .edit-btn:hover { color: var(--sap-gold); }
         
         .hidden-answer { filter: blur(8px); opacity: 0.1; }
         .search-box { background: #334155; border: 1px solid #475569; color: white; border-radius: 12px; padding: 12px 20px; width: 100%; }
+        .search-box:focus { background: #334155; color: white; border-color: var(--sap-gold); outline: none; }
         
         .modal-content { background: var(--card-bg); color: white; border: 1px solid #475569; }
         .form-control { background: #334155; border: 1px solid #475569; color: white; }
-        .form-control:focus { background: #334155; color: white; border-color: var(--sap-gold); }
+        .form-control:focus { background: #334155; color: white; border-color: var(--sap-gold); box-shadow: none; }
+        
+        .badge-category { background: var(--sap-blue); padding: 5px 10px; border-radius: 5px; font-size: 0.75rem; margin-right: 5px; }
+        .quiz-indicator { font-size: 0.9rem; color: var(--text-dim); margin-top: 10px; font-style: italic; }
 
         @media (max-width: 992px) { 
             .sidebar { width: 100%; height: auto; position: relative; display: flex; overflow-x: auto; padding: 15px; }
@@ -35,19 +41,19 @@
 <body>
 
 <div class="sidebar" id="sidebar">
-    <h4 class="text-warning mb-4">SAP Library ✏️</h4>
+    <h4 class="text-warning mb-4">📚 SAP Library</h4>
     <div id="moduleNav"></div>
 </div>
 
 <div class="main-content">
-    <div class="d-flex justify-content-between align-items-center mb-4 gap-3">
-        <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search topics..." onkeyup="searchTech()">
+    <div class="d-flex justify-content-between align-items-center mb-4 gap-3 flex-wrap">
+        <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search topics..." onkeyup="searchTech()" style="flex: 1; min-width: 200px;">
         <button class="btn btn-warning fw-bold px-4" onclick="openEditModal(null)">➕ Add Topic</button>
     </div>
 
     <div class="form-check form-switch mb-4">
         <input class="form-check-input" type="checkbox" id="quizSwitch" onchange="toggleQuizMode()">
-        <label class="form-check-label small fw-bold" for="quizSwitch">QUIZ MODE (Click cards to reveal)</label>
+        <label class="form-check-label small fw-bold" for="quizSwitch">🎯 QUIZ MODE (Click cards to reveal answers)</label>
     </div>
 
     <div id="content-area"></div>
@@ -86,17 +92,69 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Initial Data
+    // Initial Data with Datasphere Objects
     const defaultData = {
-        bw: { title: "SAP BW", items: [{ name: "InfoObject", def: "Foundation of BW.", list: ["Char","Key Figure"] }] },
-        datasphere: { title: "Datasphere", items: [{ name: "Spaces", def: "Work environments." }] },
-        sac: { title: "SAC", items: [{ name: "Stories", def: "Visualizations." }] },
-        hana: { title: "HANA", items: [{ name: "Views", def: "Modeling tool." }] },
-        bo: { title: "BO/WebI", items: [{ name: "Universe", def: "Semantic layer." }] }
+        bw: { 
+            title: "SAP BW", 
+            items: [
+                { name: "InfoObject", def: "Foundation of BW modeling. Can be characteristic (dimension) or key figure (measure).", list: ["Characteristic: Dimensions (customer, product, time)", "Key Figure: Measures (revenue, quantity, cost)"] },
+                { name: "InfoCube", def: "Star schema database structure combining dimensions and facts.", list: ["Contains characteristics and key figures", "Basis for BEx queries", "Transactional or aggregated data"] },
+                { name: "CompositeProvider", def: "Combines multiple InfoCubes or InfoObjects without physical joining.", list: ["Virtual object", "Combines heterogeneous sources", "Flexible for complex reporting"] }
+            ]
+        },
+        datasphere: { 
+            title: "SAP Datasphere", 
+            items: [
+                { name: "Table (Local Table)", def: "Physical table stored in SAP Datasphere holding data from imports or replication.", list: ["Store raw data from CSV imports", "Target for replication/data flows", "Can be marked as Relational Dataset, Dimension, or Fact"] },
+                { name: "Remote Table", def: "Virtual reference to table in external source system without importing.", list: ["Real-time federation OR snapshot-based access", "Sources: SAP S/4HANA, BW/4HANA, Databases, Cloud", "Real-time slower; snapshots cache locally"] },
+                { name: "Graphical View", def: "No-code/low-code visual tool to combine, transform, and enrich data.", list: ["Join, Union, Projection, Aggregation, Filter", "Can be Relational Dataset, Dimension, or Fact", "Must be manually deployed"] },
+                { name: "SQL View", def: "View created using SQL code for advanced transformations and complex logic.", list: ["Native HANA SQL syntax", "For scenarios graphical views cannot handle", "Must be manually deployed"] },
+                { name: "Analytic Model (★ PRIMARY)", def: "Multi-dimensional analytical model for consumption in SAP Analytics Cloud.", list: ["Source: Fact Views", "Dimensions, Measures, Calculated Measures, Restricted Measures", "Variables for user input, Hierarchies, Associations", "Replaced Analytical Dataset - now legacy"] },
+                { name: "Fact View", def: "View with semantic type Fact - represents transactional/measures data.", list: ["Must have at least one measure", "Must have associations to dimensions", "Source for Analytic Models", "Separates relational from analytical modeling"] },
+                { name: "Dimension View", def: "View with semantic type Dimension containing master data and hierarchies.", list: ["Key Attribute, Text Attributes", "Hierarchies (level-based or parent-child)", "Time-dependent attributes", "Referenced in Facts via associations"] },
+                { name: "Entity-Relationship Model", def: "Data modeling container showing relationships between tables and views.", list: ["Visualize dependencies between objects", "Define relationships and cardinality", "Dependency analysis and impact assessment"] },
+                { name: "Replication Flow", def: "Automated data replication from source systems with initial and delta loads (ELT approach).", list: ["Sources: ABAP CDS Views, ODP Extractors, ABAP Tables", "Load Types: Initial, Delta, or Both", "Targets: Tables, HANA Cloud, external systems", "Auto-deployed and highly efficient"] },
+                { name: "Data Flow", def: "Graphical tool for complex ETL with code capability - transform first, then load.", list: ["Operators: Join, Union, Filter, Aggregation, Python Script", "Python scripting for custom transformations", "Target: Always persists to table", "Must be manually deployed"] },
+                { name: "Task Chain", def: "Workflow orchestrating multiple tasks (flows, jobs) in sequence or parallel.", list: ["Components: Data Flows, Replication Flows, nested Chains", "Execution: Serial or parallel", "Dependency management and error handling", "Similar to BW Process Chains"] },
+                { name: "Semantic Types (Core Concept)", def: "Classification defining analytical purpose of views/tables.", list: ["Relational Dataset: Default, non-analytical", "Dimension: Master data with hierarchies", "Fact: Transactional data with measures"] },
+                { name: "Association", def: "Link between Fact and Dimension objects enabling drill-down and attribute retrieval.", list: ["Source: Field in Fact", "Target: Key in Dimension", "Multi-level associations (A→B→C)", "Only required joins executed at query time"] },
+                { name: "Hierarchy", def: "Organizational structure for dimensions - parent-child or level-based.", list: ["Level-Based: Fixed levels (Country→State→City)", "Parent-Child: Dynamic relationships", "Multiple hierarchies per dimension", "Time-dependent hierarchies supported"] },
+                { name: "Measure/Metric", def: "Numerical value for analysis - KPI or aggregated value.", list: ["Base Measure: Directly from source data", "Calculated Measure: Custom formula", "Restricted Measure: Base measure with filter", "Aggregation: Sum, Average, Min, Max, Count"] },
+                { name: "Variable", def: "Input parameter for dynamic filtering/prompting in Analytic Models.", list: ["Filter Variables: Dimension member selection", "Source Variables: Parameters from fact", "Restricted Measure Variables: Dynamic measure filters", "Mandatory/optional, single/multi-value"] },
+                { name: "Calculated Column", def: "New column derived from existing columns using expressions.", list: ["Add computed fields without views", "Unit conversions, conditional logic", "String manipulation", "Available in views where created"] },
+                { name: "Connection", def: "Configuration for connecting to external data sources.", list: ["Types: S/4HANA, BW/4HANA, Databases, Cloud, SFTP, APIs", "Enable data federation and replication", "Authentication and proxy configuration"] },
+                { name: "Space", def: "Virtual workspace containing models, connections, resources for user group.", list: ["Dedicated storage and compute resources", "User access control within space", "Connection sharing within space", "Isolation from other spaces"] },
+                { name: "Data Access Control (DAC)", def: "Row-level security restricting data access based on user attributes.", list: ["Restrict fact/dimension rows", "Assign users to organizational units", "Applied automatically in models", "Enforce privacy and compliance"] },
+                { name: "Data Catalog", def: "Central metadata repository for governance and discovery.", list: ["Glossary Terms: Business definitions", "KPIs: Key performance indicators", "Repository Explorer: Search and browse", "Impact and Lineage: Dependencies"] },
+                { name: "Intelligent Lookup", def: "Smart joining mechanism for matching entities without traditional keys.", list: ["Fuzzy matching, composite keys", "Solve complex data matching", "More flexible than standard joins", "Higher performance cost"] },
+                { name: "Parameter (Input Parameter)", def: "Dynamic value passed into views/flows at execution time.", list: ["Create parameterized views", "Different scenarios", "Used in graphical views, SQL views, data flows"] }
+            ]
+        },
+        sac: { 
+            title: "SAC", 
+            items: [
+                { name: "Story", def: "SAC visualization and dashboard combining multiple pages and visualizations.", list: ["Canvas for designing reports", "Multiple pages for different analyses", "Drill-down and interactive features"] },
+                { name: "Model", def: "Data source connected to SAC from Datasphere or BW.", list: ["Live data connection", "Real-time or cached mode", "Supports analytics and planning"] }
+            ]
+        },
+        hana: { 
+            title: "HANA", 
+            items: [
+                { name: "Calculation View", def: "HANA modeling tool combining relational and analytical scenarios.", list: ["Join, Aggregation, Union operations", "Graphical and SQL variants", "Basis for many Datasphere views"] },
+                { name: "Graphical View", def: "Visual composition of HANA objects.", list: ["Join, Union, Projection", "No-code modeling", "Restricted Measures and calculated columns"] }
+            ]
+        },
+        bo: { 
+            title: "BO/WebI", 
+            items: [
+                { name: "Universe", def: "Semantic layer between database and reporting tools.", list: ["Business-friendly object names", "Predefined joins and calculations", "Access control and row-level security"] },
+                { name: "Report", def: "WebI report built on universe", list: ["Query results and formatting", "Drill-down and filters", "Multiple blocks and tables"] }
+            ]
+        }
     };
 
     let sapData = JSON.parse(localStorage.getItem('sapData')) || defaultData;
-    let currentModule = "bw";
+    let currentModule = "datasphere";
     let isQuizMode = false;
     const editModal = new bootstrap.Modal(document.getElementById('editModal'));
 
@@ -115,15 +173,16 @@
 
     function render() {
         const data = sapData[currentModule];
-        let html = `<h2 class="text-warning mb-4">${data.title}</h2>`;
+        let html = `<h2 class="text-warning mb-4">📖 ${data.title}</h2>`;
         data.items.forEach((item, idx) => {
             html += `
                 <div class="tech-card" onclick="revealAnswer(this)">
-                    <button class="edit-btn" onclick="event.stopPropagation(); openEditModal(${idx})">✏️</button>
+                    <button class="edit-btn" onclick="event.stopPropagation(); openEditModal(${idx})" title="Edit">✏️</button>
                     <h5 class="text-info">Q: ${item.name}</h5>
                     <div class="answer-area ${isQuizMode ? 'hidden-answer' : ''}">
-                        <p>${item.def}</p>
-                        ${item.list ? `<ul>${item.list.map(l => `<li>${l}</li>`).join('')}</ul>` : ''}
+                        <p><strong>A:</strong> ${item.def}</p>
+                        ${item.list && item.list.length > 0 ? `<ul class="mb-0">${item.list.map(l => `<li>${l}</li>`).join('')}</ul>` : ''}
+                        <div class="quiz-indicator">💡 Click to reveal in quiz mode</div>
                     </div>
                 </div>`;
         });
@@ -171,12 +230,25 @@
         }
     }
 
-    function toggleQuizMode() { isQuizMode = document.getElementById('quizSwitch').checked; render(); }
-    function revealAnswer(card) { if(isQuizMode) card.querySelector('.answer-area').classList.toggle('hidden-answer'); }
+    function toggleQuizMode() { 
+        isQuizMode = document.getElementById('quizSwitch').checked; 
+        render(); 
+    }
+
+    function revealAnswer(card) { 
+        if(isQuizMode) {
+            const answerArea = card.querySelector('.answer-area');
+            answerArea.classList.toggle('hidden-answer');
+        }
+    }
+
     function searchTech() {
         const term = document.getElementById('searchInput').value.toLowerCase();
         const cards = document.getElementsByClassName('tech-card');
-        for (let card of cards) card.style.display = card.innerText.toLowerCase().includes(term) ? "" : "none";
+        for (let card of cards) {
+            const matches = card.innerText.toLowerCase().includes(term);
+            card.style.display = matches ? "" : "none";
+        }
     }
 
     init();
