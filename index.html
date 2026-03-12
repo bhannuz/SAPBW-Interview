@@ -151,6 +151,8 @@
             border-radius: 8px;
             padding: 10px 15px;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .user-text {
@@ -158,7 +160,12 @@
             font-size: 0.9rem;
         }
 
-        .logout-btn {
+        .user-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .logout-btn, .sync-btn {
             background: #e74c3c;
             color: white;
             border: none;
@@ -168,8 +175,16 @@
             font-size: 0.85rem;
         }
 
+        .sync-btn {
+            background: var(--sap-blue);
+        }
+
         .logout-btn:hover {
             background: #c0392b;
+        }
+
+        .sync-btn:hover {
+            background: #0052a3;
         }
 
         .topic-popup {
@@ -318,17 +333,64 @@
 
         .hidden { display: none !important; }
 
-        .sync-indicator {
+        .sync-modal {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             background: var(--card-bg);
-            border: 1px solid #334155;
+            border: 2px solid var(--sap-gold);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            z-index: 3000;
+            display: none;
+        }
+
+        .sync-modal.show {
+            display: block;
+        }
+
+        .sync-modal h3 {
+            color: var(--sap-gold);
+            margin-bottom: 20px;
+        }
+
+        .sync-modal textarea {
+            width: 100%;
+            height: 200px;
+            background: #334155;
+            border: 1px solid #475569;
+            color: white;
+            padding: 10px;
             border-radius: 8px;
-            padding: 10px 15px;
-            font-size: 0.85rem;
-            color: #2ecc71;
-            z-index: 999;
+            font-family: monospace;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .sync-modal button {
+            background: var(--sap-blue);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .sync-modal button:hover {
+            background: #0052a3;
+        }
+
+        .sync-modal .close-btn {
+            background: #666;
+        }
+
+        .sync-modal .close-btn:hover {
+            background: #555;
         }
 
         @media (max-width: 992px) { 
@@ -343,7 +405,7 @@
 <div id="loginScreen" class="login-container">
     <div class="login-card">
         <div class="login-title">📚 SAP Library</div>
-        <div class="login-subtitle">Cross-Browser Study Guide</div>
+        <div class="login-subtitle">Study Guide with Sync</div>
         
         <div id="loginForm">
             <input type="text" id="loginUsername" class="login-input" placeholder="Username" value="admin">
@@ -369,7 +431,14 @@
         <div class="login-info">
             <strong>🔓 Quick Start:</strong><br>
             Username: <strong>admin</strong><br>
-            Password: <strong>admin123</strong>
+            Password: <strong>admin123</strong><br><br>
+            <strong>💡 Sync Instructions:</strong><br>
+            1. Add topics in browser<br>
+            2. Click "Export Data"<br>
+            3. Copy the text<br>
+            4. Go to other browser<br>
+            5. Click "Import Data"<br>
+            6. Paste the text
         </div>
     </div>
 </div>
@@ -381,7 +450,10 @@
         
         <div class="user-section">
             <div class="user-text" id="userName">👤 User</div>
-            <button class="logout-btn" onclick="handleLogout()">Logout</button>
+            <div class="user-buttons">
+                <button class="sync-btn" onclick="openSyncModal()">⬆️ Sync</button>
+                <button class="logout-btn" onclick="handleLogout()">Logout</button>
+            </div>
         </div>
 
         <div id="moduleNav"></div>
@@ -395,8 +467,6 @@
 
         <div id="content-area"></div>
     </div>
-
-    <div class="sync-indicator" id="syncIndicator">✓ Data Synced</div>
 </div>
 
 <!-- Topic Popup -->
@@ -446,110 +516,82 @@
     </div>
 </div>
 
+<!-- Sync Modal -->
+<div class="sync-modal" id="syncModal">
+    <h3 id="syncTitle">Export Data</h3>
+    <textarea id="syncText" readonly></textarea>
+    <button onclick="copySyncText()">📋 Copy to Clipboard</button>
+    <button onclick="toggleSyncMode()">📥 Switch to Import</button>
+    <button class="close-btn" onclick="closeSyncModal()">Close</button>
+
+    <div id="importSection" class="hidden">
+        <h4 style="color: var(--sap-gold); margin-top: 20px;">Paste Data Here:</h4>
+        <textarea id="importText" placeholder="Paste exported data here..."></textarea>
+        <button onclick="importSyncData()">Import Data</button>
+        <button class="close-btn" onclick="toggleSyncMode()">Back to Export</button>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // =============================================
-    // STORAGE SYSTEM - Works across all browsers
-    // =============================================
-    
-    class DataStore {
-        constructor() {
-            this.storageKey = 'sapLibraryData_v2';
-            this.init();
-        }
-
-        init() {
-            // Check if data exists
-            const existing = this.get('users');
-            if (!existing) {
-                // Initialize with default user
-                this.set('users', this.getDefaultUsers());
-                console.log('✅ Data store initialized');
-            }
-        }
-
-        set(key, value) {
-            try {
-                const data = JSON.parse(localStorage.getItem(this.storageKey) || '{}');
-                data[key] = value;
-                localStorage.setItem(this.storageKey, JSON.stringify(data));
-                return true;
-            } catch (e) {
-                console.error('Storage error:', e);
-                return false;
-            }
-        }
-
-        get(key) {
-            try {
-                const data = JSON.parse(localStorage.getItem(this.storageKey) || '{}');
-                return data[key];
-            } catch (e) {
-                console.error('Read error:', e);
-                return null;
-            }
-        }
-
-        getDefaultUsers() {
-            return {
-                admin: {
-                    password: 'admin123',
-                    data: {
-                        bw: {
-                            title: "SAP BW",
-                            items: [
-                                { name: "InfoObject", def: "Foundation of BW modeling. Can be characteristic (dimension) or key figure (measure).", list: ["Characteristic: Dimensions (customer, product, time)", "Key Figure: Measures (revenue, quantity, cost)"] },
-                                { name: "InfoCube", def: "Star schema database structure combining dimensions and facts.", list: ["Contains characteristics and key figures", "Basis for BEx queries", "Transactional or aggregated data"] },
-                                { name: "CompositeProvider", def: "Combines multiple InfoCubes or InfoObjects without physical joining.", list: ["Virtual object", "Combines heterogeneous sources", "Flexible for complex reporting"] }
-                            ]
-                        },
-                        datasphere: {
-                            title: "SAP Datasphere",
-                            items: [
-                                { name: "Table (Local Table)", def: "Physical table stored in SAP Datasphere.", list: ["Store raw data from imports", "Target for replication/data flows"] },
-                                { name: "Analytic Model", def: "Multi-dimensional analytical model for SAC.", list: ["Source: Fact Views", "Dimensions, Measures, Calculated Measures"] }
-                            ]
-                        },
-                        sac: {
-                            title: "SAC",
-                            items: [
-                                { name: "Story", def: "SAC visualization and dashboard.", list: ["Multiple pages", "Drill-down features"] }
-                            ]
-                        },
-                        hana: {
-                            title: "HANA",
-                            items: [
-                                { name: "Calculation View", def: "HANA modeling tool.", list: ["Join operations", "Graphical variants"] }
-                            ]
-                        },
-                        bo: {
-                            title: "BO/WebI",
-                            items: [
-                                { name: "Universe", def: "Semantic layer between database and reporting.", list: ["Business-friendly names", "Access control"] }
-                            ]
-                        }
-                    }
-                }
-            };
-        }
-    }
-
-    // =============================================
-    // APP CODE
-    // =============================================
-
-    let dataStore = null;
     let currentUser = null;
     let currentModule = "bw";
     let currentPopupIndex = null;
     let sapData = {};
     let editModal = null;
+    let syncMode = 'export';
+
+    const DEFAULT_TOPICS = {
+        bw: {
+            title: "SAP BW",
+            items: [
+                { name: "InfoObject", def: "Foundation of BW modeling.", list: ["Characteristic: Dimensions", "Key Figure: Measures"] },
+                { name: "InfoCube", def: "Star schema database structure.", list: ["Contains characteristics and key figures", "Basis for BEx queries"] },
+                { name: "CompositeProvider", def: "Combines multiple InfoCubes.", list: ["Virtual object", "Combines heterogeneous sources"] }
+            ]
+        },
+        datasphere: {
+            title: "SAP Datasphere",
+            items: [
+                { name: "Table (Local Table)", def: "Physical table stored.", list: ["Store raw data", "Target for replication"] },
+                { name: "Analytic Model", def: "Multi-dimensional model.", list: ["Source: Fact Views", "Dimensions, Measures"] }
+            ]
+        },
+        sac: {
+            title: "SAC",
+            items: [
+                { name: "Story", def: "SAC visualization.", list: ["Multiple pages", "Drill-down features"] }
+            ]
+        },
+        hana: {
+            title: "HANA",
+            items: [
+                { name: "Calculation View", def: "HANA modeling tool.", list: ["Join operations", "Graphical variants"] }
+            ]
+        },
+        bo: {
+            title: "BO/WebI",
+            items: [
+                { name: "Universe", def: "Semantic layer.", list: ["Business-friendly names", "Access control"] }
+            ]
+        }
+    };
 
     window.addEventListener('load', function() {
-        dataStore = new DataStore();
+        initializeApp();
         editModal = new bootstrap.Modal(document.getElementById('editModal'));
-        console.log('✅ App loaded');
     });
+
+    function initializeApp() {
+        let users = localStorage.getItem('sapLibraryUsers');
+        if (!users) {
+            const defaultUsers = {
+                admin: { password: 'admin123', data: JSON.parse(JSON.stringify(DEFAULT_TOPICS)) }
+            };
+            localStorage.setItem('sapLibraryUsers', JSON.stringify(defaultUsers));
+            console.log('✅ App initialized');
+        }
+    }
 
     function toggleMode() {
         document.getElementById('loginForm').classList.toggle('hidden');
@@ -570,8 +612,10 @@
             return;
         }
 
-        const users = dataStore.get('users');
-        if (!users || !users[username]) {
+        const usersStr = localStorage.getItem('sapLibraryUsers');
+        const users = JSON.parse(usersStr);
+
+        if (!users[username]) {
             errorEl.textContent = '❌ Username not found';
             errorEl.style.display = 'block';
             return;
@@ -583,7 +627,6 @@
             return;
         }
 
-        // Login successful
         currentUser = username;
         sapData = JSON.parse(JSON.stringify(users[username].data));
         document.getElementById('loginScreen').classList.add('hidden');
@@ -618,22 +661,22 @@
             return;
         }
 
-        const users = dataStore.get('users');
+        const usersStr = localStorage.getItem('sapLibraryUsers');
+        const users = JSON.parse(usersStr);
+
         if (users[username]) {
             errorEl.textContent = '❌ Username already exists';
             errorEl.style.display = 'block';
             return;
         }
 
-        // Create new user
         users[username] = {
             password: password,
-            data: JSON.parse(JSON.stringify(dataStore.getDefaultUsers().admin.data))
+            data: JSON.parse(JSON.stringify(DEFAULT_TOPICS))
         };
 
-        dataStore.set('users', users);
+        localStorage.setItem('sapLibraryUsers', JSON.stringify(users));
 
-        // Auto login
         currentUser = username;
         sapData = JSON.parse(JSON.stringify(users[username].data));
         document.getElementById('loginScreen').classList.add('hidden');
@@ -656,10 +699,10 @@
 
     function saveUserData() {
         if (currentUser) {
-            const users = dataStore.get('users');
+            const usersStr = localStorage.getItem('sapLibraryUsers');
+            const users = JSON.parse(usersStr);
             users[currentUser].data = sapData;
-            dataStore.set('users', users);
-            console.log('✅ Data saved for user:', currentUser);
+            localStorage.setItem('sapLibraryUsers', JSON.stringify(users));
         }
     }
 
@@ -762,6 +805,61 @@
         for (let card of cards) {
             const matches = card.innerText.toLowerCase().includes(term);
             card.style.display = matches ? "" : "none";
+        }
+    }
+
+    // ===== SYNC FUNCTIONS =====
+    function openSyncModal() {
+        syncMode = 'export';
+        document.getElementById('importSection').classList.add('hidden');
+        document.getElementById('syncTitle').innerText = '⬆️ Export Data';
+        const exportData = JSON.stringify(sapData, null, 2);
+        document.getElementById('syncText').value = exportData;
+        document.getElementById('syncModal').classList.add('show');
+    }
+
+    function closeSyncModal() {
+        document.getElementById('syncModal').classList.remove('show');
+    }
+
+    function toggleSyncMode() {
+        if (syncMode === 'export') {
+            syncMode = 'import';
+            document.getElementById('importSection').classList.remove('hidden');
+            document.getElementById('syncTitle').innerText = '📥 Import Data';
+        } else {
+            syncMode = 'export';
+            document.getElementById('importSection').classList.add('hidden');
+            document.getElementById('syncTitle').innerText = '⬆️ Export Data';
+        }
+    }
+
+    function copySyncText() {
+        const text = document.getElementById('syncText').value;
+        navigator.clipboard.writeText(text).then(() => {
+            alert('✅ Data copied to clipboard!');
+        }).catch(() => {
+            alert('❌ Could not copy. Please try manual copy.');
+        });
+    }
+
+    function importSyncData() {
+        const importText = document.getElementById('importText').value.trim();
+        
+        if (!importText) {
+            alert('❌ Please paste data first');
+            return;
+        }
+
+        try {
+            const importedData = JSON.parse(importText);
+            sapData = importedData;
+            saveUserData();
+            init();
+            closeSyncModal();
+            alert('✅ Data imported successfully!');
+        } catch (e) {
+            alert('❌ Invalid data format. Please check and try again.');
         }
     }
 
