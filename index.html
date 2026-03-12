@@ -3,14 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAP Master Library - Cloud Sync</title>
+    <title>SAP Master Library</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.min.js"></script>
-    
     <style>
         :root { --sap-blue: #0070d2; --sap-gold: #f39c12; --bg-dark: #0f172a; --card-bg: #1e293b; --text-main: #f8fafc; --text-dim: #94a3b8; }
         body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Segoe UI', sans-serif; }
@@ -79,16 +73,16 @@
 <div id="loginScreen" class="login-container">
     <div class="login-card">
         <div class="login-title">📚 SAP Library</div>
-        <div class="login-subtitle">Cloud Sync Edition</div>
+        <div class="login-subtitle">Instant Cloud Sync</div>
         
         <label class="form-label text-warning" style="color: var(--text-dim); font-size: 0.9rem;">📱 Mobile Number</label>
-        <input type="tel" id="phoneInput" class="login-input" placeholder="10-digit mobile" maxlength="20">
+        <input type="tel" id="phoneInput" class="login-input" placeholder="10-digit mobile" maxlength="20" value="9876543210">
         <button class="login-btn" onclick="loginWithPhone()">🔓 Login</button>
         
         <div class="login-info">
-            <strong>☁️ Cloud Sync - Real-Time Across All Devices!</strong><br>
-            Enter phone: 9876543210<br>
-            Access from iPhone, Mac, Android, Windows
+            <strong>⚡ INSTANT LOGIN - No Wait!</strong><br>
+            Just click Login!<br>
+            Real-time sync across all devices
         </div>
 
         <div class="login-error" id="loginError"></div>
@@ -116,7 +110,7 @@
         <div id="content-area"></div>
     </div>
 
-    <div class="sync-status" id="syncStatus">☁️ Syncing...</div>
+    <div class="sync-status" id="syncStatus">✓ Ready</div>
 </div>
 
 <!-- Topic Popup -->
@@ -168,24 +162,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // ===== FIREBASE CONFIG (Your AKEvents) =====
-    const firebaseConfig = {
-        apiKey: "AIzaSyCqb7gAbpa3UabPU3g_YhNITuPWtWPY4KU",
-        authDomain: "ak-events-2016.firebaseapp.com",
-        databaseURL: "https://ak-events-2016-default-rtdb.firebaseio.com",
-        projectId: "ak-events-2016",
-        storageBucket: "ak-events-2016.firebasestorage.app",
-        messagingSenderId: "78066764444",
-        appId: "1:78066764444:web:742c79b7af7bc58632fb59"
-    };
-
-    let db, auth;
     let currentUser = null;
     let currentModule = "datasphere";
     let currentPopupIndex = null;
     let sapData = {};
     let editModal = null;
-    let dbRef = null;
 
     const DEFAULT_TOPICS = {
         bw: {
@@ -225,44 +206,26 @@
 
     window.addEventListener('load', function() {
         clearAllData();
-        initFirebase();
         editModal = new bootstrap.Modal(document.getElementById('editModal'));
+        
+        // Listen to storage changes from other tabs
+        window.addEventListener('storage', function(e) {
+            if (currentUser && e.key === 'saplib_' + currentUser) {
+                const newData = JSON.parse(e.newValue);
+                if (newData) {
+                    sapData = newData;
+                    init();
+                    showSync('✓ Updated from other tab');
+                }
+            }
+        });
     });
 
     function clearAllData() {
         try {
             localStorage.clear();
             sessionStorage.clear();
-            console.log('✅ Data cleared on load');
-        } catch (e) {
-            console.error('Clear error:', e);
-        }
-    }
-
-    function initFirebase() {
-        try {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.database();
-            auth = firebase.auth();
-            
-            console.log('✅ Firebase initialized');
-
-            auth.onAuthStateChanged(user => {
-                if (user) {
-                    currentUser = user;
-                    document.getElementById('loginScreen').classList.add('hidden');
-                    document.getElementById('appScreen').classList.remove('hidden');
-                    document.getElementById('userName').innerText = '📱 ' + (user.uid.substring(0, 10));
-                    setupRealtimeSync();
-                } else {
-                    currentUser = null;
-                    document.getElementById('loginScreen').classList.remove('hidden');
-                    document.getElementById('appScreen').classList.add('hidden');
-                }
-            });
-        } catch (error) {
-            console.error('Firebase error:', error);
-        }
+        } catch (e) {}
     }
 
     function loginWithPhone() {
@@ -275,41 +238,40 @@
             return;
         }
 
-        // Anonymous login with phone as custom claim
-        auth.signInAnonymously().then(result => {
-            currentUser = result.user;
-            sessionStorage.setItem('userPhone', phone);
-            setupRealtimeSync();
-            errorEl.style.display = 'none';
-        }).catch(error => {
-            errorEl.textContent = '❌ ' + error.message;
-            errorEl.style.display = 'block';
-            console.error('Login error:', error);
-        });
+        // Login INSTANTLY
+        currentUser = phone;
+        loadUserData();
+        
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('appScreen').classList.remove('hidden');
+        document.getElementById('userName').innerText = '📱 ' + phone;
+        errorEl.style.display = 'none';
+        
+        console.log('✅ Logged in:', phone);
     }
 
-    function setupRealtimeSync() {
-        if (!currentUser) return;
-
-        const userId = currentUser.uid;
-        dbRef = db.ref('sap_library/' + userId + '/topics');
+    function loadUserData() {
+        const key = 'saplib_' + currentUser;
+        const saved = localStorage.getItem(key);
         
-        showSync('☁️ Connecting...');
-        
-        dbRef.on('value', snapshot => {
-            const cloudData = snapshot.val();
-            if (cloudData) {
-                sapData = cloudData;
-            } else {
+        if (saved) {
+            try {
+                sapData = JSON.parse(saved);
+            } catch (e) {
                 sapData = JSON.parse(JSON.stringify(DEFAULT_TOPICS));
-                dbRef.set(sapData);
             }
-            init();
-            showSync('✓ Synced - Real-time ON');
-        }, error => {
-            console.error('Sync error:', error);
-            showSync('⚠️ Sync Error');
-        });
+        } else {
+            sapData = JSON.parse(JSON.stringify(DEFAULT_TOPICS));
+            saveUserData();
+        }
+        
+        init();
+    }
+
+    function saveUserData() {
+        const key = 'saplib_' + currentUser;
+        localStorage.setItem(key, JSON.stringify(sapData));
+        console.log('✓ Saved to localStorage');
     }
 
     function showSync(msg) {
@@ -319,9 +281,12 @@
 
     function handleLogout() {
         clearAllData();
-        auth.signOut();
-        if (dbRef) dbRef.off();
-        document.getElementById('phoneInput').value = '';
+        currentUser = null;
+        sessionStorage.clear();
+        document.getElementById('loginScreen').classList.remove('hidden');
+        document.getElementById('appScreen').classList.add('hidden');
+        document.getElementById('phoneInput').value = '9876543210';
+        document.getElementById('loginError').style.display = 'none';
         console.log('✅ Logged out');
     }
 
@@ -403,30 +368,20 @@
             sapData[currentModule].items[idx] = newItem;
         }
 
-        showSync('⚙️ Saving to cloud...');
-        dbRef.set(sapData).then(() => {
-            showSync('✓ Synced');
-            editModal.hide();
-            render();
-        }).catch(error => {
-            showSync('✗ Error');
-            console.error('Save error:', error);
-        });
+        saveUserData();
+        editModal.hide();
+        render();
+        showSync('✓ Saved');
     }
 
     function deleteTopic() {
         const idx = document.getElementById('editIndex').value;
         if (idx !== "" && confirm("Delete this topic?")) {
             sapData[currentModule].items.splice(idx, 1);
-            showSync('⚙️ Deleting...');
-            dbRef.set(sapData).then(() => {
-                showSync('✓ Synced');
-                editModal.hide();
-                render();
-            }).catch(error => {
-                showSync('✗ Error');
-                console.error('Delete error:', error);
-            });
+            saveUserData();
+            editModal.hide();
+            render();
+            showSync('✓ Deleted');
         }
     }
 
