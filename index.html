@@ -13,45 +13,58 @@
         
         .main-content { margin-left: 260px; padding: 30px; }
         
-        .module-btn { width: 100%; background: none; border: none; color: #94a3b8; text-align: left; padding: 12px; border-radius: 8px; margin-bottom: 6px; transition: 0.2s; }
+        .module-btn { width: 100%; background: none; border: none; color: #94a3b8; text-align: left; padding: 12px; border-radius: 8px; margin-bottom: 6px; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
         .module-btn:hover, .module-btn.active { background: #0070d2; color: white; }
-        
+        .count-badge { background: rgba(255,255,255,0.15); padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; }
+
         .tech-card { background: #1e293b; padding: 20px; border-left: 4px solid orange; border-radius: 10px; margin-bottom: 15px; cursor: pointer; transition: 0.3s; }
         .tech-card:hover { transform: translateX(5px); box-shadow: 0 0 15px rgba(0, 112, 210, 0.3); }
 
-        /* Popup Scrolling Fixes */
+        /* Popup Scrolling & Width Fixes */
         .popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 2000; }
         
         .popup-content { 
             background: #1e293b; 
             border-radius: 12px; 
-            max-width: 650px; 
-            width: 90%; 
-            max-height: 85vh; /* Prevents popup from going off-screen */
+            max-width: 850px; 
+            width: 95%; 
+            max-height: 90vh; 
             display: flex;
             flex-direction: column;
             border: 1px solid #334155;
             position: relative;
             overflow: hidden; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        .popup-body { 
-            padding: 30px; 
-            overflow-y: auto; /* Makes the content scrollable */
-            flex-grow: 1; 
-        }
+        .popup-body { padding: 40px; overflow-y: auto; flex-grow: 1; }
+        .popup-body h4 { font-size: 1.6rem; font-weight: 600; }
+        .popup-body p, .popup-body li { line-height: 1.6; font-size: 1.05rem; }
 
         .popup-footer { 
-            padding: 15px 30px; 
+            padding: 20px 40px; 
             background: #1e293b; 
             border-top: 1px solid #334155; 
             display: flex; 
-            gap: 10px; 
+            gap: 15px; 
+            flex-wrap: wrap;
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            .popup-content, .popup-content * { visibility: visible; }
+            .popup-content { position: absolute; left: 0; top: 0; width: 100%; max-height: none; border: none; }
+            .popup-footer { display: none !important; }
+            .popup-body { color: black !important; padding: 0; }
+            .text-warning { color: #856404 !important; }
+            .text-light { color: black !important; }
         }
 
         @media(max-width:768px){
             .sidebar { position: relative; width: 100%; height: auto; border-right: none; }
             .main-content { margin-left: 0; padding: 20px; }
+            .popup-body { padding: 20px; }
+            .popup-footer { padding: 15px 20px; }
         }
     </style>
 </head>
@@ -80,13 +93,15 @@
         </div>
         <div class="popup-footer">
             <button class="btn btn-secondary" onclick="closePopup()">Close</button>
+            <button class="btn btn-info" onclick="copyTopic()">Copy Text</button>
+            <button class="btn btn-success" onclick="window.print()">Print PDF</button>
             <button id="editBtn" class="btn btn-primary">Edit / Delete</button>
         </div>
     </div>
 </div>
 
 <div class="modal fade" id="editModal" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content bg-dark text-white border-secondary">
             <div class="modal-header border-secondary">
                 <h5 id="modalTitle">Topic Details</h5>
@@ -104,7 +119,7 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Key Points (One per line)</label>
-                    <textarea id="editList" class="form-control bg-secondary text-white border-0" rows="8" placeholder="Enter details here..."></textarea>
+                    <textarea id="editList" class="form-control bg-secondary text-white border-0" rows="12" placeholder="Enter details here..."></textarea>
                 </div>
             </div>
             <div class="modal-footer border-secondary">
@@ -148,7 +163,6 @@
 
     window.addEventListener("load", () => {
         editModalInstance = new bootstrap.Modal(document.getElementById("editModal"));
-        initModules();
         listenTopics();
     });
 
@@ -158,7 +172,10 @@
         Object.keys(MODULES).forEach(k => {
             const btn = document.createElement("button");
             btn.className = "module-btn " + (k === currentModule ? "active" : "");
-            btn.innerText = MODULES[k];
+            
+            const count = sapData[k] ? sapData[k].items.length : 0;
+            
+            btn.innerHTML = `<span>${MODULES[k]}</span> <span class="count-badge">${count}</span>`;
             btn.onclick = () => {
                 currentModule = k;
                 initModules();
@@ -178,7 +195,14 @@
                     sapData[data.module].items.push({ id: d.id, ...data });
                 }
             });
-            render();
+
+            // Sort items alphabetically within each module
+            Object.keys(sapData).forEach(m => {
+                sapData[m].items.sort((a, b) => a.name.localeCompare(b.name));
+            });
+
+            initModules(); 
+            render();      
         });
     }
 
@@ -210,6 +234,17 @@
 
     window.closePopup = function() { document.getElementById("topicPopup").style.display = "none"; }
 
+    window.copyTopic = function() {
+        const title = document.getElementById("popupTitle").innerText;
+        const def = document.getElementById("popupDef").innerText;
+        const list = Array.from(document.querySelectorAll("#popupList li")).map(li => "• " + li.innerText).join("\n");
+        const fullText = `${title}\n\n${def}\n\n${list}`;
+        
+        navigator.clipboard.writeText(fullText).then(() => {
+            alert("Topic copied to clipboard!");
+        });
+    }
+
     window.openEditModal = function(i) {
         const idxInput = document.getElementById("editIndex");
         const delBtn = document.getElementById("deleteBtn");
@@ -235,9 +270,12 @@
 
     window.saveTopic = async function() {
         const idx = document.getElementById("editIndex").value;
+        const nameVal = document.getElementById("editName").value;
+        if(!nameVal.trim()) return alert("Topic Name is required");
+
         const item = {
             module: currentModule,
-            name: document.getElementById("editName").value,
+            name: nameVal,
             def: document.getElementById("editDef").value,
             list: document.getElementById("editList").value.split("\n").filter(x => x.trim() !== "")
         };
