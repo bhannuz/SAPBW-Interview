@@ -73,6 +73,13 @@
 <div class="sidebar">
     <h4 class="mb-4">📚 SAP Library</h4>
     <div id="moduleNav"></div>
+    
+    <hr class="border-secondary mt-4">
+    <div class="d-grid gap-2">
+        <button class="btn btn-sm btn-outline-success" onclick="exportBackup()">💾 Backup Data</button>
+        <button class="btn btn-sm btn-outline-info" onclick="document.getElementById('restoreInput').click()">📥 Restore Data</button>
+        <input type="file" id="restoreInput" style="display:none" accept=".json" onchange="importBackup(event)">
+    </div>
 </div>
 
 <div class="main-content">
@@ -135,7 +142,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyB9_sBL83sKvIaOvAE8msHw1WQ80QwhxfU",
@@ -196,7 +203,6 @@
                 }
             });
 
-            // Sort items alphabetically within each module
             Object.keys(sapData).forEach(m => {
                 sapData[m].items.sort((a, b) => a.name.localeCompare(b.name));
             });
@@ -307,6 +313,49 @@
         document.querySelectorAll(".tech-card").forEach(c => {
             c.style.display = c.innerText.toLowerCase().includes(term) ? "" : "none";
         });
+    }
+
+    // --- BACKUP & RESTORE FUNCTIONS ---
+
+    window.exportBackup = async function() {
+        try {
+            const querySnapshot = await getDocs(collection(db, "sap_topics"));
+            const allData = [];
+            querySnapshot.forEach((doc) => {
+                allData.push(doc.data());
+            });
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(allData, null, 2));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "sap_library_backup.json");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        } catch (e) { alert("Backup failed: " + e.message); }
+    }
+
+    window.importBackup = function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                if (!Array.isArray(importedData)) throw new Error("Invalid file format.");
+
+                if (!confirm(`Are you sure you want to restore ${importedData.length} topics? This will add them to your current library.`)) return;
+
+                let count = 0;
+                for (const item of importedData) {
+                    await addDoc(collection(db, "sap_topics"), item);
+                    count++;
+                }
+                alert(`Successfully restored ${count} topics!`);
+            } catch (err) { alert("Restore failed: " + err.message); }
+        };
+        reader.readAsText(file);
     }
 </script>
 
