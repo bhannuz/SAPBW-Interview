@@ -7,14 +7,48 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background: #0f172a; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        /* Sidebar styling */
         .sidebar { background: #1e293b; padding: 20px; width: 260px; height: 100vh; position: fixed; left: 0; top: 0; overflow-y: auto; border-right: 1px solid #334155; }
+        
         .main-content { margin-left: 260px; padding: 30px; }
+        
         .module-btn { width: 100%; background: none; border: none; color: #94a3b8; text-align: left; padding: 12px; border-radius: 8px; margin-bottom: 6px; transition: 0.2s; }
         .module-btn:hover, .module-btn.active { background: #0070d2; color: white; }
+        
         .tech-card { background: #1e293b; padding: 20px; border-left: 4px solid orange; border-radius: 10px; margin-bottom: 15px; cursor: pointer; transition: 0.3s; }
         .tech-card:hover { transform: translateX(5px); box-shadow: 0 0 15px rgba(0, 112, 210, 0.3); }
-        .popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 2000; }
-        .popup-content { background: #1e293b; padding: 30px; border-radius: 12px; max-width: 500px; width: 90%; border: 1px solid #334155; }
+
+        /* Popup Scrolling Fixes */
+        .popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 2000; }
+        
+        .popup-content { 
+            background: #1e293b; 
+            border-radius: 12px; 
+            max-width: 650px; 
+            width: 90%; 
+            max-height: 85vh; /* Prevents popup from going off-screen */
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #334155;
+            position: relative;
+            overflow: hidden; 
+        }
+
+        .popup-body { 
+            padding: 30px; 
+            overflow-y: auto; /* Makes the content scrollable */
+            flex-grow: 1; 
+        }
+
+        .popup-footer { 
+            padding: 15px 30px; 
+            background: #1e293b; 
+            border-top: 1px solid #334155; 
+            display: flex; 
+            gap: 10px; 
+        }
+
         @media(max-width:768px){
             .sidebar { position: relative; width: 100%; height: auto; border-right: none; }
             .main-content { margin-left: 0; padding: 20px; }
@@ -38,11 +72,13 @@
 
 <div class="popup" id="topicPopup">
     <div class="popup-content">
-        <h4 id="popupTitle" class="text-warning"></h4>
-        <hr>
-        <p id="popupDef" class="text-light"></p>
-        <ul id="popupList" class="mt-3"></ul>
-        <div class="d-flex gap-2 mt-4">
+        <div class="popup-body">
+            <h4 id="popupTitle" class="text-warning"></h4>
+            <hr>
+            <p id="popupDef" class="text-light" style="white-space: pre-wrap;"></p>
+            <ul id="popupList" class="mt-3"></ul>
+        </div>
+        <div class="popup-footer">
             <button class="btn btn-secondary" onclick="closePopup()">Close</button>
             <button id="editBtn" class="btn btn-primary">Edit / Delete</button>
         </div>
@@ -68,7 +104,7 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Key Points (One per line)</label>
-                    <textarea id="editList" class="form-control bg-secondary text-white border-0" rows="5" placeholder="Feature 1&#10;Feature 2"></textarea>
+                    <textarea id="editList" class="form-control bg-secondary text-white border-0" rows="8" placeholder="Enter details here..."></textarea>
                 </div>
             </div>
             <div class="modal-footer border-secondary">
@@ -152,7 +188,7 @@
         if (!data) return;
         
         let html = `<h3 class="mb-4">${data.title}</h3>`;
-        if (data.items.length === 0) html += `<p class="text-muted">No topics found in this module. Add one!</p>`;
+        if (data.items.length === 0) html += `<p class="text-muted">No topics found. Add one!</p>`;
         
         data.items.forEach((item, i) => {
             html += `<div class="tech-card" onclick="openPopup(${i})"><h5>${item.name}</h5></div>`;
