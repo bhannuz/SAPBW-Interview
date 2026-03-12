@@ -7,18 +7,65 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background: #0f172a; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .sidebar { background: #1e293b; padding: 20px; width: 280px; height: 100vh; position: fixed; left: 0; top: 0; overflow-y: auto; border-right: 1px solid #334155; }
-        .main-content { margin-left: 280px; padding: 30px; }
-        .module-btn { width: 100%; background: none; border: none; color: #94a3b8; text-align: left; padding: 12px; border-radius: 8px; margin-bottom: 6px; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; }
+        
+        /* Sidebar styling */
+        .sidebar { background: #1e293b; padding: 20px; width: 260px; height: 100vh; position: fixed; left: 0; top: 0; overflow-y: auto; border-right: 1px solid #334155; }
+        
+        .main-content { margin-left: 260px; padding: 30px; }
+        
+        .module-btn { width: 100%; background: none; border: none; color: #94a3b8; text-align: left; padding: 12px; border-radius: 8px; margin-bottom: 6px; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
         .module-btn:hover, .module-btn.active { background: #0070d2; color: white; }
         .count-badge { background: rgba(255,255,255,0.15); padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; }
+
         .tech-card { background: #1e293b; padding: 20px; border-left: 4px solid orange; border-radius: 10px; margin-bottom: 15px; cursor: pointer; transition: 0.3s; }
         .tech-card:hover { transform: translateX(5px); box-shadow: 0 0 15px rgba(0, 112, 210, 0.3); }
+
+        /* Popup Scrolling & Width Fixes */
         .popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; z-index: 2000; }
-        .popup-content { background: #1e293b; border-radius: 12px; max-width: 850px; width: 95%; max-height: 90vh; display: flex; flex-direction: column; border: 1px solid #334155; overflow: hidden; }
+        
+        .popup-content { 
+            background: #1e293b; 
+            border-radius: 12px; 
+            max-width: 850px; 
+            width: 95%; 
+            max-height: 90vh; 
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #334155;
+            position: relative;
+            overflow: hidden; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
         .popup-body { padding: 40px; overflow-y: auto; flex-grow: 1; }
-        .popup-footer { padding: 20px 40px; background: #1e293b; border-top: 1px solid #334155; display: flex; gap: 15px; }
-        @media(max-width:768px){ .sidebar { position: relative; width: 100%; height: auto; } .main-content { margin-left: 0; } }
+        .popup-body h4 { font-size: 1.6rem; font-weight: 600; }
+        .popup-body p, .popup-body li { line-height: 1.6; font-size: 1.05rem; }
+
+        .popup-footer { 
+            padding: 20px 40px; 
+            background: #1e293b; 
+            border-top: 1px solid #334155; 
+            display: flex; 
+            gap: 15px; 
+            flex-wrap: wrap;
+        }
+
+        @media print {
+            body * { visibility: hidden; }
+            .popup-content, .popup-content * { visibility: visible; }
+            .popup-content { position: absolute; left: 0; top: 0; width: 100%; max-height: none; border: none; }
+            .popup-footer { display: none !important; }
+            .popup-body { color: black !important; padding: 0; }
+            .text-warning { color: #856404 !important; }
+            .text-light { color: black !important; }
+        }
+
+        @media(max-width:768px){
+            .sidebar { position: relative; width: 100%; height: auto; border-right: none; }
+            .main-content { margin-left: 0; padding: 20px; }
+            .popup-body { padding: 20px; }
+            .popup-footer { padding: 15px 20px; }
+        }
     </style>
 </head>
 <body>
@@ -26,13 +73,6 @@
 <div class="sidebar">
     <h4 class="mb-4">📚 SAP Library</h4>
     <div id="moduleNav"></div>
-    <hr class="border-secondary">
-    <div class="d-grid gap-2">
-        <button class="btn btn-sm btn-outline-info" onclick="openModuleModal()">⚙️ Manage Modules</button>
-        <button class="btn btn-sm btn-outline-success" onclick="exportFullBackup()">💾 Export JSON</button>
-        <button class="btn btn-sm btn-outline-warning" onclick="document.getElementById('importFile').click()">📥 Import JSON</button>
-        <input type="file" id="importFile" style="display:none" accept=".json" onchange="importFullBackup(event)">
-    </div>
 </div>
 
 <div class="main-content">
@@ -54,6 +94,7 @@
         <div class="popup-footer">
             <button class="btn btn-secondary" onclick="closePopup()">Close</button>
             <button class="btn btn-info" onclick="copyTopic()">Copy Text</button>
+            <button class="btn btn-success" onclick="window.print()">Print PDF</button>
             <button id="editBtn" class="btn btn-primary">Edit / Delete</button>
         </div>
     </div>
@@ -69,10 +110,6 @@
             <div class="modal-body">
                 <input type="hidden" id="editIndex">
                 <div class="mb-3">
-                    <label class="form-label">Category (Module)</label>
-                    <select id="editModuleSelect" class="form-select bg-secondary text-white border-0"></select>
-                </div>
-                <div class="mb-3">
                     <label class="form-label">Topic Name</label>
                     <input id="editName" class="form-control bg-secondary text-white border-0">
                 </div>
@@ -82,27 +119,13 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Key Points (One per line)</label>
-                    <textarea id="editList" class="form-control bg-secondary text-white border-0" rows="10"></textarea>
+                    <textarea id="editList" class="form-control bg-secondary text-white border-0" rows="12" placeholder="Enter details here..."></textarea>
                 </div>
             </div>
             <div class="modal-footer border-secondary">
                 <button id="deleteBtn" class="btn btn-danger me-auto" onclick="deleteTopic()">Delete Topic</button>
+                <button class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
                 <button class="btn btn-primary" onclick="saveTopic()">Save Changes</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="moduleModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content bg-dark text-white">
-            <div class="modal-header"><h5>Manage SAP Categories</h5><button class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
-            <div class="modal-body">
-                <div class="input-group mb-3">
-                    <input id="newModuleName" class="form-control bg-secondary text-white border-0" placeholder="New Category Name">
-                    <button class="btn btn-success" onclick="addModule()">Add</button>
-                </div>
-                <ul id="moduleListUI" class="list-group"></ul>
             </div>
         </div>
     </div>
@@ -112,7 +135,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyB9_sBL83sKvIaOvAE8msHw1WQ80QwhxfU",
@@ -126,208 +149,166 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    let currentModuleId = "";
-    let modulesList = [];
+    let currentModule = "bw";
     let sapData = {};
-    let editModal, moduleModal;
+    let editModalInstance;
+
+    const MODULES = {
+        bw: "SAP BW",
+        datasphere: "SAP Datasphere",
+        sac: "SAP SAC",
+        hana: "SAP HANA",
+        bo: "SAP BO/WebI"
+    };
 
     window.addEventListener("load", () => {
-        editModal = new bootstrap.Modal(document.getElementById("editModal"));
-        moduleModal = new bootstrap.Modal(document.getElementById("moduleModal"));
-        listenModules();
+        editModalInstance = new bootstrap.Modal(document.getElementById("editModal"));
         listenTopics();
     });
 
-    function listenModules() {
-        onSnapshot(query(collection(db, "sap_modules"), orderBy("name")), (snap) => {
-            modulesList = [];
-            snap.forEach(d => modulesList.push({ id: d.id, name: d.data().name }));
-            if (!currentModuleId && modulesList.length > 0) currentModuleId = modulesList[0].id;
-            renderSidebar();
-            renderModuleEditor();
-            updateModuleSelect();
-        });
-    }
-
-    function renderSidebar() {
+    function initModules() {
         const nav = document.getElementById("moduleNav");
         nav.innerHTML = "";
-        modulesList.forEach(m => {
+        Object.keys(MODULES).forEach(k => {
             const btn = document.createElement("button");
-            btn.className = "module-btn " + (m.id === currentModuleId ? "active" : "");
-            const count = (sapData[m.id] || []).length;
-            btn.innerHTML = `<span>${m.name}</span> <span class="count-badge">${count}</span>`;
-            btn.onclick = () => { currentModuleId = m.id; renderSidebar(); renderTopics(); };
+            btn.className = "module-btn " + (k === currentModule ? "active" : "");
+            
+            const count = sapData[k] ? sapData[k].items.length : 0;
+            
+            btn.innerHTML = `<span>${MODULES[k]}</span> <span class="count-badge">${count}</span>`;
+            btn.onclick = () => {
+                currentModule = k;
+                initModules();
+                render();
+            };
             nav.appendChild(btn);
         });
     }
 
     function listenTopics() {
-        onSnapshot(collection(db, "sap_topics"), (snap) => {
+        onSnapshot(collection(db, "sap_topics"), (snapshot) => {
             sapData = {};
-            snap.forEach(d => {
+            Object.keys(MODULES).forEach(m => { sapData[m] = { title: MODULES[m], items: [] }; });
+            snapshot.forEach(d => {
                 const data = d.data();
-                if (!sapData[data.moduleId]) sapData[data.moduleId] = [];
-                sapData[data.moduleId].push({ id: d.id, ...data });
+                if(sapData[data.module]) {
+                    sapData[data.module].items.push({ id: d.id, ...data });
+                }
             });
-            Object.keys(sapData).forEach(k => sapData[k].sort((a,b) => a.name.localeCompare(b.name)));
-            renderSidebar();
-            renderTopics();
+
+            // Sort items alphabetically within each module
+            Object.keys(sapData).forEach(m => {
+                sapData[m].items.sort((a, b) => a.name.localeCompare(b.name));
+            });
+
+            initModules(); 
+            render();      
         });
     }
 
-    function renderTopics() {
+    function render() {
+        const data = sapData[currentModule];
         const container = document.getElementById("content-area");
-        const items = sapData[currentModuleId] || [];
-        const modName = modulesList.find(m => m.id === currentModuleId)?.name || "Select Category";
-        let html = `<h3 class="mb-4">${modName}</h3>`;
-        if (items.length === 0) html += `<p class="text-muted">No topics here yet.</p>`;
-        items.forEach((item, i) => {
+        if (!data) return;
+        
+        let html = `<h3 class="mb-4">${data.title}</h3>`;
+        if (data.items.length === 0) html += `<p class="text-muted">No topics found. Add one!</p>`;
+        
+        data.items.forEach((item, i) => {
             html += `<div class="tech-card" onclick="openPopup(${i})"><h5>${item.name}</h5></div>`;
         });
         container.innerHTML = html;
     }
 
-    window.openPopup = (i) => {
-        const t = sapData[currentModuleId][i];
-        popupTitle.innerText = t.name;
-        popupDef.innerText = t.def;
-        popupList.innerHTML = t.list.map(x => `<li>${x}</li>`).join("");
+    window.openPopup = function(i) {
+        const t = sapData[currentModule].items[i];
+        document.getElementById("popupTitle").innerText = t.name;
+        document.getElementById("popupDef").innerText = t.def;
+        document.getElementById("popupList").innerHTML = t.list.map(x => `<li>${x}</li>`).join("");
+        
+        const editBtn = document.getElementById("editBtn");
         editBtn.onclick = () => { closePopup(); openEditModal(i); };
-        topicPopup.style.display = "flex";
-    };
+        
+        document.getElementById("topicPopup").style.display = "flex";
+    }
 
-    window.closePopup = () => topicPopup.style.display = "none";
+    window.closePopup = function() { document.getElementById("topicPopup").style.display = "none"; }
 
-    window.openEditModal = (i) => {
+    window.copyTopic = function() {
+        const title = document.getElementById("popupTitle").innerText;
+        const def = document.getElementById("popupDef").innerText;
+        const list = Array.from(document.querySelectorAll("#popupList li")).map(li => "• " + li.innerText).join("\n");
+        const fullText = `${title}\n\n${def}\n\n${list}`;
+        
+        navigator.clipboard.writeText(fullText).then(() => {
+            alert("Topic copied to clipboard!");
+        });
+    }
+
+    window.openEditModal = function(i) {
+        const idxInput = document.getElementById("editIndex");
+        const delBtn = document.getElementById("deleteBtn");
+        
         if (i !== null) {
-            const t = sapData[currentModuleId][i];
-            editIndex.value = i;
-            editModuleSelect.value = t.moduleId;
-            editName.value = t.name;
-            editDef.value = t.def;
-            editList.value = t.list.join("\n");
-            deleteBtn.style.display = "block";
+            const t = sapData[currentModule].items[i];
+            idxInput.value = i;
+            document.getElementById("editName").value = t.name;
+            document.getElementById("editDef").value = t.def;
+            document.getElementById("editList").value = t.list.join("\n");
+            delBtn.style.display = "block";
+            document.getElementById("modalTitle").innerText = "Edit Topic";
         } else {
-            editIndex.value = "";
-            editModuleSelect.value = currentModuleId;
-            editName.value = ""; editDef.value = ""; editList.value = "";
-            deleteBtn.style.display = "none";
+            idxInput.value = "";
+            document.getElementById("editName").value = "";
+            document.getElementById("editDef").value = "";
+            document.getElementById("editList").value = "";
+            delBtn.style.display = "none";
+            document.getElementById("modalTitle").innerText = "Add New Topic";
         }
-        editModal.show();
-    };
+        editModalInstance.show();
+    }
 
-    window.saveTopic = async () => {
-        const idx = editIndex.value;
+    window.saveTopic = async function() {
+        const idx = document.getElementById("editIndex").value;
+        const nameVal = document.getElementById("editName").value;
+        if(!nameVal.trim()) return alert("Topic Name is required");
+
         const item = {
-            moduleId: editModuleSelect.value,
-            name: editName.value,
-            def: editDef.value,
-            list: editList.value.split("\n").filter(x => x.trim() !== "")
+            module: currentModule,
+            name: nameVal,
+            def: document.getElementById("editDef").value,
+            list: document.getElementById("editList").value.split("\n").filter(x => x.trim() !== "")
         };
-        if (idx === "") await addDoc(collection(db, "sap_topics"), item);
-        else await updateDoc(doc(db, "sap_topics", sapData[currentModuleId][idx].id), item);
-        editModal.hide();
-    };
 
-    window.deleteTopic = async () => {
-        if (confirm("Delete this topic?")) {
-            await deleteDoc(doc(db, "sap_topics", sapData[currentModuleId][editIndex.value].id));
-            editModal.hide();
-        }
-    };
-
-    window.openModuleModal = () => moduleModal.show();
-
-    window.addModule = async () => {
-        const name = newModuleName.value.trim();
-        if (name) {
-            await addDoc(collection(db, "sap_modules"), { name });
-            newModuleName.value = "";
-        }
-    };
-
-    function renderModuleEditor() {
-        moduleListUI.innerHTML = modulesList.map(m => `
-            <li class="list-group-item bg-secondary text-white d-flex justify-content-between align-items-center border-dark">
-                ${m.name}
-                <button class="btn btn-sm btn-danger" onclick="deleteModule('${m.id}')">Delete</button>
-            </li>
-        `).join("");
-    }
-
-    window.deleteModule = async (id) => {
-        if (confirm("Delete this category? (Topics will remain but be hidden)")) {
-            await deleteDoc(doc(db, "sap_modules", id));
-        }
-    };
-
-    function updateModuleSelect() {
-        editModuleSelect.innerHTML = modulesList.map(m => `<option value="${m.id}">${m.name}</option>`).join("");
-    }
-
-    // EXPORT
-    window.exportFullBackup = async () => {
         try {
-            const modSnap = await getDocs(collection(db, "sap_modules"));
-            const topSnap = await getDocs(collection(db, "sap_topics"));
-            const modules = []; modSnap.forEach(d => modules.push({ id: d.id, ...d.data() }));
-            const topics = []; topSnap.forEach(d => topics.push({ id: d.id, ...d.data() }));
-            const blob = new Blob([JSON.stringify({ modules, topics }, null, 2)], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = `SAP_Library_Backup.json`;
-            a.click();
-            alert("Backup exported.");
-        } catch (e) { alert("Export failed: " + e.message); }
-    };
+            if (idx === "") {
+                await addDoc(collection(db, "sap_topics"), item);
+            } else {
+                const id = sapData[currentModule].items[idx].id;
+                await updateDoc(doc(db, "sap_topics", id), item);
+            }
+            editModalInstance.hide();
+        } catch (e) { alert("Error saving: " + e.message); }
+    }
 
-    // IMPORT
-    window.importFullBackup = (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            try {
-                const data = JSON.parse(e.target.result);
-                if (!confirm(`This will add ${data.modules.length} modules and ${data.topics.length} topics. Continue?`)) return;
-                
-                // Track old IDs to map to new Firestore IDs
-                const moduleMapping = {};
+    window.deleteTopic = async function() {
+        const idx = document.getElementById("editIndex").value;
+        if (idx === "" || !confirm("Are you sure you want to delete this topic?")) return;
+        
+        try {
+            const id = sapData[currentModule].items[idx].id;
+            await deleteDoc(doc(db, "sap_topics", id));
+            editModalInstance.hide();
+        } catch (e) { alert("Error deleting: " + e.message); }
+    }
 
-                for (const m of data.modules) {
-                    const docRef = await addDoc(collection(db, "sap_modules"), { name: m.name });
-                    moduleMapping[m.id] = docRef.id;
-                }
-
-                for (const t of data.topics) {
-                    const newItem = {
-                        moduleId: moduleMapping[t.moduleId] || t.moduleId,
-                        name: t.name,
-                        def: t.def,
-                        list: t.list
-                    };
-                    await addDoc(collection(db, "sap_topics"), newItem);
-                }
-                alert("Restore Complete!");
-                location.reload();
-            } catch (err) { alert("Restore failed: " + err.message); }
-        };
-        reader.readAsText(file);
-    };
-
-    window.searchTech = () => {
-        const term = searchInput.value.toLowerCase();
+    window.searchTech = function() {
+        const term = document.getElementById("searchInput").value.toLowerCase();
         document.querySelectorAll(".tech-card").forEach(c => {
             c.style.display = c.innerText.toLowerCase().includes(term) ? "" : "none";
         });
-    };
-
-    window.copyTopic = () => {
-        const text = `${popupTitle.innerText}\n\n${popupDef.innerText}\n\n${Array.from(document.querySelectorAll("#popupList li")).map(li => "• " + li.innerText).join("\n")}`;
-        navigator.clipboard.writeText(text).then(() => alert("Copied!"));
-    };
+    }
 </script>
+
 </body>
 </html>
