@@ -7,7 +7,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
     <style>
         :root { --sap-blue: #0070d2; --sap-gold: #f39c12; --bg-dark: #0f172a; --card-bg: #1e293b; --text-main: #f8fafc; --text-dim: #94a3b8; }
         body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Segoe UI', sans-serif; padding-bottom: 50px; }
@@ -346,7 +345,7 @@
 <!-- Phone Login Screen -->
 <div id="phoneScreen" class="phone-login-container">
     <div class="phone-login-card">
-        <div class="phone-title">📱 SAP Library</div>
+        <div class="phone-title">📚 SAP Library</div>
         <div class="phone-subtitle">Login with Phone Number</div>
         
         <input 
@@ -368,7 +367,7 @@
         <div class="phone-info">
             <strong>ℹ️ How it works:</strong><br>
             • Enter your phone number<br>
-            • First time? Auto account created<br>
+            • First time? Account created<br>
             • Returns? Auto login<br>
             • Data syncs to cloud ☁️<br>
             • Use any device with same number
@@ -469,9 +468,7 @@
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    const auth = firebase.auth();
 
-    let currentUser = null;
     let currentPhone = null;
     let currentModule = "bw";
     let isQuizMode = false;
@@ -523,6 +520,7 @@
         const phone = document.getElementById('phoneInput').value.trim();
         const errorEl = document.getElementById('phoneError');
         const successEl = document.getElementById('phoneSuccess');
+        const loginBtn = document.getElementById('loginBtn');
 
         errorEl.style.display = 'none';
         successEl.style.display = 'none';
@@ -539,39 +537,38 @@
             return;
         }
 
-        document.getElementById('loginBtn').disabled = true;
-        document.getElementById('loginBtn').innerText = 'Connecting...';
+        loginBtn.disabled = true;
+        loginBtn.innerText = 'Connecting...';
 
-        // Create anonymous account using phone as identifier
-        auth.signInAnonymously()
-            .then((result) => {
-                currentUser = result.user;
-                currentPhone = phone;
+        // Use phone as user ID directly (no auth needed)
+        currentPhone = phone;
 
-                // Save phone to database
-                const ref = db.ref('sap_library/' + phone + '/info');
-                ref.set({ lastLogin: new Date().toISOString() });
-
-                // Load user's data
-                loadDataFromCloud();
-
-                // Show success
-                successEl.textContent = '✅ Login successful! Loading your library...';
-                successEl.style.display = 'block';
-
-                setTimeout(() => {
-                    document.getElementById('phoneScreen').classList.add('hidden');
-                    document.getElementById('appScreen').classList.remove('hidden');
-                    document.getElementById('userPhone').innerText = '📱 ' + phone;
-                    init();
-                }, 1500);
-            })
-            .catch((error) => {
-                errorEl.textContent = '❌ Error: ' + error.message;
+        // Save login info to database
+        const ref = db.ref('sap_library/' + phone + '/info');
+        ref.set({ lastLogin: new Date().toISOString() }, (error) => {
+            if (error) {
+                errorEl.textContent = '❌ Connection error. Check internet and try again.';
                 errorEl.style.display = 'block';
-                document.getElementById('loginBtn').disabled = false;
-                document.getElementById('loginBtn').innerText = '🔓 Login / Sign Up';
-            });
+                loginBtn.disabled = false;
+                loginBtn.innerText = '🔓 Login / Sign Up';
+                console.error('Firebase error:', error);
+                return;
+            }
+
+            // Load user's data
+            loadDataFromCloud();
+
+            // Show success
+            successEl.textContent = '✅ Login successful! Loading your library...';
+            successEl.style.display = 'block';
+
+            setTimeout(() => {
+                document.getElementById('phoneScreen').classList.add('hidden');
+                document.getElementById('appScreen').classList.remove('hidden');
+                document.getElementById('userPhone').innerText = '📱 ' + phone;
+                init();
+            }, 1500);
+        });
     }
 
     // Load Data from Cloud
@@ -579,7 +576,7 @@
         if (!currentPhone) return;
 
         const ref = db.ref('sap_library/' + currentPhone + '/topics');
-        ref.on('value', snapshot => {
+        ref.once('value', snapshot => {
             const cloudData = snapshot.val();
             if (cloudData) {
                 sapData = cloudData;
@@ -596,15 +593,15 @@
         if (!currentPhone) return;
 
         const ref = db.ref('sap_library/' + currentPhone + '/topics');
-        ref.set(sapData)
-            .then(() => {
+        ref.set(sapData, (error) => {
+            if (!error) {
                 updateSyncStatus('✓ Saved');
                 setTimeout(() => updateSyncStatus('✓ Synced'), 1000);
-            })
-            .catch(error => {
+            } else {
                 updateSyncStatus('✗ Error');
                 console.error('Save error:', error);
-            });
+            }
+        });
     }
 
     function updateSyncStatus(status) {
@@ -615,8 +612,6 @@
 
     // Logout
     function handleLogout() {
-        auth.signOut();
-        currentUser = null;
         currentPhone = null;
         document.getElementById('appScreen').classList.add('hidden');
         document.getElementById('phoneScreen').classList.remove('hidden');
