@@ -3,11 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAP Master Library | Phone Login Real-Time Sync</title>
+    <title>SAP Master Library | Phone Login</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js"></script>
     <style>
         :root { --sap-blue: #0070d2; --sap-gold: #f39c12; --bg-dark: #0f172a; --card-bg: #1e293b; --text-main: #f8fafc; --text-dim: #94a3b8; }
         body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Segoe UI', sans-serif; }
@@ -86,25 +83,13 @@
         
         <div id="phoneForm">
             <label class="form-label text-warning" style="color: var(--text-dim); font-size: 0.9rem;">📱 Mobile Number</label>
-            <input type="tel" id="phoneInput" class="login-input" placeholder="+91 XXXXX XXXXX" maxlength="20">
-            <button class="login-btn" onclick="sendOTP()">📤 Send OTP</button>
+            <input type="tel" id="phoneInput" class="login-input" placeholder="Enter 10-digit mobile" maxlength="20">
+            <button class="login-btn" onclick="loginWithPhone()">🔓 Login</button>
             
             <div class="login-info">
-                <strong>✅ Use Phone Number Only</strong><br>
-                Example: +91 98765 43210<br>
-                or: 9876543210
-            </div>
-        </div>
-
-        <div id="otpForm" class="hidden">
-            <label class="form-label text-warning" style="color: var(--text-dim); font-size: 0.9rem;">🔐 Enter OTP</label>
-            <input type="text" id="otpInput" class="login-input" placeholder="Enter 6-digit OTP" maxlength="6">
-            <button class="login-btn" onclick="verifyOTP()">✅ Verify OTP</button>
-            <button class="login-btn" style="background: #667; margin-bottom: 0;" onclick="backToPhone()">← Back</button>
-            
-            <div class="login-info">
-                <strong>⏱️ OTP sent to your phone</strong><br>
-                Valid for 10 minutes
+                <strong>✅ Demo Mode - No OTP Needed</strong><br>
+                Enter any 10-digit number to login<br>
+                Example: 9876543210
             </div>
         </div>
 
@@ -186,6 +171,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script async defer src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.min.js"></script>
+<script async defer src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.min.js"></script>
+<script async defer src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.min.js"></script>
+
 <script>
     // ===== YOUR AKEVENTS FIREBASE CONFIG =====
     const firebaseConfig = {
@@ -198,14 +187,15 @@
         appId: "1:78066764444:web:742c79b7af7bc58632fb59"
     };
 
-    let db, auth;
+    let db = null;
+    let auth = null;
     let currentUser = null;
     let currentModule = "datasphere";
     let currentPopupIndex = null;
     let sapData = {};
     let editModal = null;
     let dbRef = null;
-    let recaptchaVerifier = null;
+    let firebaseReady = false;
 
     const DEFAULT_TOPICS = {
         bw: {
@@ -247,24 +237,17 @@
         // Clear Safari data on load
         clearAllData();
         
-        initFirebase();
+        // Initialize Firebase when scripts load
+        setTimeout(initFirebase, 2000);
+        
         editModal = new bootstrap.Modal(document.getElementById('editModal'));
     });
 
     function clearAllData() {
-        // ✅ Revoke all Safari cached data
         try {
             localStorage.clear();
             sessionStorage.clear();
-            if (window.indexedDB) {
-                const dbs = ['_default'];
-                dbs.forEach(db => {
-                    try {
-                        indexedDB.deleteDatabase(db);
-                    } catch (e) {}
-                });
-            }
-            console.log('✅ All cached data cleared - Safari data revoked');
+            console.log('✅ All cached data cleared');
         } catch (e) {
             console.error('Error clearing storage:', e);
         }
@@ -272,16 +255,25 @@
 
     function initFirebase() {
         try {
+            if (typeof firebase === 'undefined') {
+                console.log('Firebase loading... please wait');
+                setTimeout(initFirebase, 1000);
+                return;
+            }
+
             firebase.initializeApp(firebaseConfig);
             db = firebase.database();
             auth = firebase.auth();
+            firebaseReady = true;
+            
+            console.log('✅ Firebase initialized');
 
             auth.onAuthStateChanged(user => {
                 if (user) {
                     currentUser = user;
                     document.getElementById('loginScreen').classList.add('hidden');
                     document.getElementById('appScreen').classList.remove('hidden');
-                    document.getElementById('userName').innerText = '📱 ' + (user.phoneNumber || user.uid);
+                    document.getElementById('userName').innerText = '📱 ' + (user.phoneNumber || user.uid.substring(0, 10));
                     setupRealtimeSync();
                 } else {
                     currentUser = null;
@@ -291,29 +283,10 @@
             });
         } catch (error) {
             console.error('Firebase Error:', error);
-            document.getElementById('loginError').textContent = '❌ Firebase Error: ' + error.message;
-            document.getElementById('loginError').style.display = 'block';
         }
     }
 
-    function normalizePhoneNumber(phone) {
-        // Remove all non-digit characters
-        let cleaned = phone.replace(/\D/g, '');
-        
-        // If it's 10 digits (India), add +91
-        if (cleaned.length === 10) {
-            cleaned = '91' + cleaned;
-        }
-        
-        // Add + prefix
-        if (!cleaned.startsWith('+')) {
-            cleaned = '+' + cleaned;
-        }
-        
-        return cleaned;
-    }
-
-    function sendOTP() {
+    function loginWithPhone() {
         const phoneInput = document.getElementById('phoneInput').value.trim();
         const errorEl = document.getElementById('loginError');
 
@@ -323,74 +296,39 @@
             return;
         }
 
-        const phoneNumber = normalizePhoneNumber(phoneInput);
-        console.log('Sending OTP to:', phoneNumber);
-
-        // Create recaptcha verifier
-        if (!recaptchaVerifier) {
-            recaptchaVerifier = new firebase.auth.RecaptchaVerifier('phoneForm', {
-                'size': 'invisible',
-                'callback': onRecaptchaSuccess
-            });
-        }
-
-        auth.signInWithPhoneNumber(phoneNumber, recaptchaVerifier)
-            .then(confirmationResult => {
-                window.confirmationResult = confirmationResult;
-                document.getElementById('phoneForm').classList.add('hidden');
-                document.getElementById('otpForm').classList.remove('hidden');
-                errorEl.style.display = 'none';
-            })
-            .catch(error => {
-                errorEl.textContent = '❌ ' + (error.message || 'Error sending OTP');
-                errorEl.style.display = 'block';
-                console.error('OTP Error:', error);
-            });
-    }
-
-    function onRecaptchaSuccess() {
-        console.log('✓ reCAPTCHA verified');
-    }
-
-    function verifyOTP() {
-        const otpInput = document.getElementById('otpInput').value.trim();
-        const errorEl = document.getElementById('loginError');
-
-        if (!otpInput || otpInput.length !== 6) {
-            errorEl.textContent = '❌ Please enter 6-digit OTP';
+        if (phoneInput.length < 10) {
+            errorEl.textContent = '❌ Please enter 10-digit number';
             errorEl.style.display = 'block';
             return;
         }
 
-        if (!window.confirmationResult) {
-            errorEl.textContent = '❌ OTP session expired. Try again.';
+        if (!firebaseReady || !auth) {
+            errorEl.textContent = '⏳ Firebase initializing... please wait';
             errorEl.style.display = 'block';
+            setTimeout(initFirebase, 1000);
             return;
         }
 
-        window.confirmationResult.confirm(otpInput)
-            .then(result => {
-                currentUser = result.user;
-                setupRealtimeSync();
-            })
-            .catch(error => {
-                errorEl.textContent = '❌ Invalid OTP. Please try again.';
-                errorEl.style.display = 'block';
-                console.error('OTP Error:', error);
-            });
-    }
-
-    function backToPhone() {
-        document.getElementById('phoneForm').classList.remove('hidden');
-        document.getElementById('otpForm').classList.add('hidden');
-        document.getElementById('otpInput').value = '';
-        window.confirmationResult = null;
+        // Demo mode - sign in anonymously with phone as display name
+        auth.signInAnonymously().then(result => {
+            currentUser = result.user;
+            // Store phone in session for display
+            sessionStorage.setItem('userPhone', phoneInput);
+            setupRealtimeSync();
+            errorEl.style.display = 'none';
+        }).catch(error => {
+            errorEl.textContent = '❌ Login Error: ' + error.message;
+            errorEl.style.display = 'block';
+            console.error('Login error:', error);
+        });
     }
 
     function setupRealtimeSync() {
         if (!currentUser) return;
 
         const userId = currentUser.uid;
+        const userPhone = sessionStorage.getItem('userPhone') || userId.substring(0, 10);
+        
         dbRef = db.ref('sap_library/' + userId + '/topics');
         
         dbRef.on('value', snapshot => {
@@ -426,13 +364,9 @@
 
     function handleLogout() {
         auth.signOut().then(() => {
-            // Revoke all data on logout
             clearAllData();
-            document.getElementById('phoneForm').classList.remove('hidden');
-            document.getElementById('otpForm').classList.add('hidden');
+            sessionStorage.clear();
             document.getElementById('phoneInput').value = '';
-            document.getElementById('otpInput').value = '';
-            window.confirmationResult = null;
             if (dbRef) dbRef.off();
             console.log('✅ Logged out - all data cleared');
         });
