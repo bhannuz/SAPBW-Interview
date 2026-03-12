@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAP Master Library | Phone Login</title>
+    <title>SAP Master Library | Login</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
     <style>
         :root { --sap-blue: #0070d2; --sap-gold: #f39c12; --bg-dark: #0f172a; --card-bg: #1e293b; --text-main: #f8fafc; --text-dim: #94a3b8; }
         body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Segoe UI', sans-serif; padding-bottom: 50px; }
@@ -29,8 +27,8 @@
         .form-control { background: #334155; border: 1px solid #475569; color: white; }
         .form-control:focus { background: #334155; color: white; border-color: var(--sap-gold); box-shadow: none; }
 
-        /* Phone Login Screen */
-        .phone-login-container {
+        /* Login Screen */
+        .login-container {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -38,44 +36,43 @@
             background: linear-gradient(135deg, #0f172a 0%, #1a1f2e 100%);
         }
 
-        .phone-login-card {
+        .login-card {
             background: var(--card-bg);
             border: 2px solid var(--sap-gold);
             border-radius: 20px;
             padding: 40px;
-            max-width: 400px;
+            max-width: 420px;
             width: 90%;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
         }
 
-        .phone-title {
+        .login-title {
             color: var(--sap-gold);
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: bold;
             margin-bottom: 10px;
             text-align: center;
         }
 
-        .phone-subtitle {
+        .login-subtitle {
             color: var(--text-dim);
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 35px;
             font-size: 0.95rem;
         }
 
-        .phone-input {
+        .login-input {
             background: #334155;
-            border: 2px solid #475569;
+            border: 1px solid #475569;
             color: white;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 10px;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
             width: 100%;
-            font-size: 1.1rem;
-            text-align: center;
+            font-size: 1rem;
         }
 
-        .phone-input:focus {
+        .login-input:focus {
             background: #334155;
             color: white;
             border-color: var(--sap-gold);
@@ -83,31 +80,46 @@
             box-shadow: 0 0 10px rgba(243, 156, 18, 0.3);
         }
 
-        .phone-btn-login {
+        .login-btn {
             background: var(--sap-gold);
             color: var(--bg-dark);
             border: none;
-            padding: 15px 20px;
-            border-radius: 10px;
+            padding: 12px 20px;
+            border-radius: 8px;
             font-weight: bold;
             width: 100%;
             cursor: pointer;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             transition: 0.3s;
             font-size: 1rem;
         }
 
-        .phone-btn-login:hover:not(:disabled) {
+        .login-btn:hover {
             background: #e8a412;
             transform: translateY(-2px);
         }
 
-        .phone-btn-login:disabled {
+        .login-btn:disabled {
             background: #666;
             cursor: not-allowed;
         }
 
-        .phone-error {
+        .login-toggle {
+            color: var(--text-dim);
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .login-toggle button {
+            background: none;
+            border: none;
+            color: var(--sap-gold);
+            cursor: pointer;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+
+        .login-error {
             color: #e74c3c;
             text-align: center;
             margin-top: 15px;
@@ -115,7 +127,7 @@
             display: none;
         }
 
-        .phone-success {
+        .login-success {
             color: #2ecc71;
             text-align: center;
             margin-top: 15px;
@@ -123,18 +135,18 @@
             display: none;
         }
 
-        .phone-info {
+        .login-info {
             background: rgba(0, 112, 210, 0.1);
             border: 1px solid var(--sap-blue);
             border-radius: 8px;
-            padding: 15px;
+            padding: 12px;
             margin-top: 20px;
             font-size: 0.85rem;
             color: var(--text-dim);
-            line-height: 1.6;
+            line-height: 1.5;
         }
 
-        .phone-info strong {
+        .login-info strong {
             color: var(--sap-gold);
         }
 
@@ -167,21 +179,6 @@
         .logout-btn:hover {
             background: #c0392b;
         }
-
-        .sync-status {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--card-bg);
-            border: 1px solid #334155;
-            border-radius: 8px;
-            padding: 10px 15px;
-            font-size: 0.85rem;
-            z-index: 999;
-        }
-
-        .sync-status.synced { color: #2ecc71; }
-        .sync-status.error { color: #e74c3c; }
 
         /* Topic Popup Modal */
         .topic-popup {
@@ -342,35 +339,70 @@
 </head>
 <body>
 
-<!-- Phone Login Screen -->
-<div id="phoneScreen" class="phone-login-container">
-    <div class="phone-login-card">
-        <div class="phone-title">📚 SAP Library</div>
-        <div class="phone-subtitle">Login with Phone Number</div>
+<!-- Login Screen -->
+<div id="loginScreen" class="login-container">
+    <div class="login-card">
+        <div class="login-title">📚 SAP Library</div>
+        <div class="login-subtitle">Learn SAP in your pocket</div>
         
-        <input 
-            type="tel" 
-            id="phoneInput" 
-            class="phone-input" 
-            placeholder="Enter your phone number"
-            inputmode="numeric"
-            onkeypress="if(event.key==='Enter') handlePhoneLogin()"
-        />
+        <!-- Login Form -->
+        <div id="loginForm">
+            <input 
+                type="text" 
+                id="loginUsername" 
+                class="login-input" 
+                placeholder="Username"
+                onkeypress="if(event.key==='Enter') handleLogin()"
+            />
+            <input 
+                type="password" 
+                id="loginPassword" 
+                class="login-input" 
+                placeholder="Password"
+                onkeypress="if(event.key==='Enter') handleLogin()"
+            />
+            <button class="login-btn" onclick="handleLogin()">🔓 Login</button>
+            <div class="login-toggle">
+                New user? <button onclick="toggleMode()">Create Account</button>
+            </div>
+        </div>
 
-        <button class="phone-btn-login" id="loginBtn" onclick="handlePhoneLogin()">
-            🔓 Login / Sign Up
-        </button>
+        <!-- Signup Form -->
+        <div id="signupForm" class="hidden">
+            <input 
+                type="text" 
+                id="signupUsername" 
+                class="login-input" 
+                placeholder="Choose username"
+                onkeypress="if(event.key==='Enter') handleSignup()"
+            />
+            <input 
+                type="password" 
+                id="signupPassword" 
+                class="login-input" 
+                placeholder="Create password"
+                onkeypress="if(event.key==='Enter') handleSignup()"
+            />
+            <input 
+                type="password" 
+                id="signupPasswordConfirm" 
+                class="login-input" 
+                placeholder="Confirm password"
+                onkeypress="if(event.key==='Enter') handleSignup()"
+            />
+            <button class="login-btn" onclick="handleSignup()">✅ Create Account</button>
+            <div class="login-toggle">
+                Already have account? <button onclick="toggleMode()">Login</button>
+            </div>
+        </div>
 
-        <div class="phone-error" id="phoneError"></div>
-        <div class="phone-success" id="phoneSuccess"></div>
+        <div class="login-error" id="loginError"></div>
+        <div class="login-success" id="loginSuccess"></div>
 
-        <div class="phone-info">
-            <strong>ℹ️ How it works:</strong><br>
-            • Enter your phone number<br>
-            • First time? Account created<br>
-            • Returns? Auto login<br>
-            • Data syncs to cloud ☁️<br>
-            • Use any device with same number
+        <div class="login-info">
+            <strong>💡 Default Account:</strong><br>
+            Username: <strong>admin</strong><br>
+            Password: <strong>admin123</strong>
         </div>
     </div>
 </div>
@@ -381,7 +413,7 @@
         <h4 class="text-warning mb-3">📚 SAP Library</h4>
         
         <div class="user-section">
-            <div class="user-text" id="userPhone">📱 User</div>
+            <div class="user-text" id="userName">👤 User</div>
             <button class="logout-btn" onclick="handleLogout()">Logout</button>
         </div>
 
@@ -400,8 +432,6 @@
         </div>
 
         <div id="content-area"></div>
-
-        <div class="sync-status synced" id="syncStatus">✓ Synced</div>
     </div>
 </div>
 
@@ -454,172 +484,171 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Firebase Config
-    const firebaseConfig = {
-        apiKey: "AIzaSyCqb7gAbpa3UabPU3g_YhNITuPWtWPY4KU",
-        authDomain: "ak-events-2016.firebaseapp.com",
-        databaseURL: "https://ak-events-2016-default-rtdb.firebaseio.com",
-        projectId: "ak-events-2016",
-        storageBucket: "ak-events-2016.firebasestorage.app",
-        messagingSenderId: "78066764444",
-        appId: "1:78066764444:web:742c79b7af7bc58632fb59"
-    };
-
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    let currentPhone = null;
+    // Local storage for users
+    let currentUser = null;
     let currentModule = "bw";
     let isQuizMode = false;
     let currentPopupIndex = null;
     const editModal = new bootstrap.Modal(document.getElementById('editModal'));
 
-    // All your SAP topics
-    const defaultData = {
-        bw: { 
-            title: "SAP BW", 
-            items: [
-                { name: "InfoObject", def: "Foundation of BW modeling. Can be characteristic (dimension) or key figure (measure).", list: ["Characteristic: Dimensions (customer, product, time)", "Key Figure: Measures (revenue, quantity, cost)"] },
-                { name: "InfoCube", def: "Star schema database structure combining dimensions and facts.", list: ["Contains characteristics and key figures", "Basis for BEx queries", "Transactional or aggregated data"] },
-                { name: "CompositeProvider", def: "Combines multiple InfoCubes or InfoObjects without physical joining.", list: ["Virtual object", "Combines heterogeneous sources", "Flexible for complex reporting"] }
-            ]
-        },
-        datasphere: { 
-            title: "SAP Datasphere", 
-            items: [
-                { name: "Table (Local Table)", def: "Physical table stored in SAP Datasphere holding data from imports or replication.", list: ["Store raw data from CSV imports", "Target for replication/data flows", "Can be marked as Relational Dataset, Dimension, or Fact"] },
-                { name: "Remote Table", def: "Virtual reference to table in external source system without importing.", list: ["Real-time federation OR snapshot-based access", "Sources: SAP S/4HANA, BW/4HANA, Databases, Cloud", "Real-time slower; snapshots cache locally"] },
-                { name: "Analytic Model (★ PRIMARY)", def: "Multi-dimensional analytical model for consumption in SAP Analytics Cloud.", list: ["Source: Fact Views", "Dimensions, Measures, Calculated Measures", "Variables for user input, Hierarchies, Associations", "Replaced Analytical Dataset - now legacy"] }
-            ]
-        },
-        sac: { 
-            title: "SAC", 
-            items: [
-                { name: "Story", def: "SAC visualization and dashboard combining multiple pages and visualizations.", list: ["Canvas for designing reports", "Multiple pages for different analyses", "Drill-down and interactive features"] }
-            ]
-        },
-        hana: { 
-            title: "HANA", 
-            items: [
-                { name: "Calculation View", def: "HANA modeling tool combining relational and analytical scenarios.", list: ["Join, Aggregation, Union operations", "Graphical and SQL variants", "Basis for many Datasphere views"] }
-            ]
-        },
-        bo: { 
-            title: "BO/WebI", 
-            items: [
-                { name: "Universe", def: "Semantic layer between database and reporting tools.", list: ["Business-friendly object names", "Predefined joins and calculations", "Access control and row-level security"] }
-            ]
+    // Default users
+    const defaultUsers = {
+        admin: {
+            password: "admin123",
+            data: {
+                bw: { 
+                    title: "SAP BW", 
+                    items: [
+                        { name: "InfoObject", def: "Foundation of BW modeling. Can be characteristic (dimension) or key figure (measure).", list: ["Characteristic: Dimensions (customer, product, time)", "Key Figure: Measures (revenue, quantity, cost)"] },
+                        { name: "InfoCube", def: "Star schema database structure combining dimensions and facts.", list: ["Contains characteristics and key figures", "Basis for BEx queries", "Transactional or aggregated data"] },
+                        { name: "CompositeProvider", def: "Combines multiple InfoCubes or InfoObjects without physical joining.", list: ["Virtual object", "Combines heterogeneous sources", "Flexible for complex reporting"] }
+                    ]
+                },
+                datasphere: { 
+                    title: "SAP Datasphere", 
+                    items: [
+                        { name: "Table (Local Table)", def: "Physical table stored in SAP Datasphere holding data from imports or replication.", list: ["Store raw data from CSV imports", "Target for replication/data flows", "Can be marked as Relational Dataset, Dimension, or Fact"] },
+                        { name: "Remote Table", def: "Virtual reference to table in external source system without importing.", list: ["Real-time federation OR snapshot-based access", "Sources: SAP S/4HANA, BW/4HANA, Databases, Cloud", "Real-time slower; snapshots cache locally"] },
+                        { name: "Analytic Model (★ PRIMARY)", def: "Multi-dimensional analytical model for consumption in SAP Analytics Cloud.", list: ["Source: Fact Views", "Dimensions, Measures, Calculated Measures", "Variables for user input, Hierarchies, Associations", "Replaced Analytical Dataset - now legacy"] }
+                    ]
+                },
+                sac: { 
+                    title: "SAC", 
+                    items: [
+                        { name: "Story", def: "SAC visualization and dashboard combining multiple pages and visualizations.", list: ["Canvas for designing reports", "Multiple pages for different analyses", "Drill-down and interactive features"] }
+                    ]
+                },
+                hana: { 
+                    title: "HANA", 
+                    items: [
+                        { name: "Calculation View", def: "HANA modeling tool combining relational and analytical scenarios.", list: ["Join, Aggregation, Union operations", "Graphical and SQL variants", "Basis for many Datasphere views"] }
+                    ]
+                },
+                bo: { 
+                    title: "BO/WebI", 
+                    items: [
+                        { name: "Universe", def: "Semantic layer between database and reporting tools.", list: ["Business-friendly object names", "Predefined joins and calculations", "Access control and row-level security"] }
+                    ]
+                }
+            }
         }
     };
 
-    let sapData = JSON.parse(JSON.stringify(defaultData));
+    let sapData = {};
+    let users = JSON.parse(localStorage.getItem('sapLibraryUsers')) || defaultUsers;
 
-    // Phone Login Handler
-    function handlePhoneLogin() {
-        const phone = document.getElementById('phoneInput').value.trim();
-        const errorEl = document.getElementById('phoneError');
-        const successEl = document.getElementById('phoneSuccess');
-        const loginBtn = document.getElementById('loginBtn');
+    // Toggle between login and signup
+    function toggleMode() {
+        document.getElementById('loginForm').classList.toggle('hidden');
+        document.getElementById('signupForm').classList.toggle('hidden');
+        document.getElementById('loginError').style.display = 'none';
+        document.getElementById('loginSuccess').style.display = 'none';
+    }
+
+    // Handle Login
+    function handleLogin() {
+        const username = document.getElementById('loginUsername').value.trim();
+        const password = document.getElementById('loginPassword').value.trim();
+        const errorEl = document.getElementById('loginError');
 
         errorEl.style.display = 'none';
-        successEl.style.display = 'none';
 
-        if (!phone) {
-            errorEl.textContent = '❌ Please enter a phone number';
+        if (!username || !password) {
+            errorEl.textContent = '❌ Please enter username and password';
             errorEl.style.display = 'block';
             return;
         }
 
-        if (!/^\d{10,}$/.test(phone)) {
-            errorEl.textContent = '❌ Please enter a valid phone number (min 10 digits)';
+        if (!users[username]) {
+            errorEl.textContent = '❌ Username not found';
             errorEl.style.display = 'block';
             return;
         }
 
-        loginBtn.disabled = true;
-        loginBtn.innerText = 'Connecting...';
+        if (users[username].password !== password) {
+            errorEl.textContent = '❌ Incorrect password';
+            errorEl.style.display = 'block';
+            return;
+        }
 
-        // Use phone as user ID directly (no auth needed)
-        currentPhone = phone;
-
-        // Save login info to database
-        const ref = db.ref('sap_library/' + phone + '/info');
-        ref.set({ lastLogin: new Date().toISOString() }, (error) => {
-            if (error) {
-                errorEl.textContent = '❌ Connection error. Check internet and try again.';
-                errorEl.style.display = 'block';
-                loginBtn.disabled = false;
-                loginBtn.innerText = '🔓 Login / Sign Up';
-                console.error('Firebase error:', error);
-                return;
-            }
-
-            // Load user's data
-            loadDataFromCloud();
-
-            // Show success
-            successEl.textContent = '✅ Login successful! Loading your library...';
-            successEl.style.display = 'block';
-
-            setTimeout(() => {
-                document.getElementById('phoneScreen').classList.add('hidden');
-                document.getElementById('appScreen').classList.remove('hidden');
-                document.getElementById('userPhone').innerText = '📱 ' + phone;
-                init();
-            }, 1500);
-        });
+        // Login successful
+        currentUser = username;
+        sapData = JSON.parse(JSON.stringify(users[username].data));
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('appScreen').classList.remove('hidden');
+        document.getElementById('userName').innerText = '👤 ' + username;
+        init();
     }
 
-    // Load Data from Cloud
-    function loadDataFromCloud() {
-        if (!currentPhone) return;
+    // Handle Signup
+    function handleSignup() {
+        const username = document.getElementById('signupUsername').value.trim();
+        const password = document.getElementById('signupPassword').value.trim();
+        const confirm = document.getElementById('signupPasswordConfirm').value.trim();
+        const errorEl = document.getElementById('loginError');
 
-        const ref = db.ref('sap_library/' + currentPhone + '/topics');
-        ref.once('value', snapshot => {
-            const cloudData = snapshot.val();
-            if (cloudData) {
-                sapData = cloudData;
-            }
-            updateSyncStatus('✓ Synced');
-        }, error => {
-            updateSyncStatus('✗ Sync Error');
-            console.error('Load error:', error);
-        });
+        errorEl.style.display = 'none';
+
+        if (!username || !password || !confirm) {
+            errorEl.textContent = '❌ Please fill in all fields';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        if (password.length < 5) {
+            errorEl.textContent = '❌ Password must be at least 5 characters';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        if (password !== confirm) {
+            errorEl.textContent = '❌ Passwords do not match';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        if (users[username]) {
+            errorEl.textContent = '❌ Username already exists';
+            errorEl.style.display = 'block';
+            return;
+        }
+
+        // Create new user
+        users[username] = {
+            password: password,
+            data: JSON.parse(JSON.stringify(defaultUsers.admin.data))
+        };
+
+        localStorage.setItem('sapLibraryUsers', JSON.stringify(users));
+
+        // Auto login
+        currentUser = username;
+        sapData = JSON.parse(JSON.stringify(users[username].data));
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('appScreen').classList.remove('hidden');
+        document.getElementById('userName').innerText = '👤 ' + username;
+        init();
     }
 
-    // Save to Cloud
-    function saveToCloud() {
-        if (!currentPhone) return;
-
-        const ref = db.ref('sap_library/' + currentPhone + '/topics');
-        ref.set(sapData, (error) => {
-            if (!error) {
-                updateSyncStatus('✓ Saved');
-                setTimeout(() => updateSyncStatus('✓ Synced'), 1000);
-            } else {
-                updateSyncStatus('✗ Error');
-                console.error('Save error:', error);
-            }
-        });
-    }
-
-    function updateSyncStatus(status) {
-        const el = document.getElementById('syncStatus');
-        el.className = 'sync-status synced';
-        el.innerHTML = status;
-    }
-
-    // Logout
+    // Handle Logout
     function handleLogout() {
-        currentPhone = null;
+        currentUser = null;
+        sapData = {};
         document.getElementById('appScreen').classList.add('hidden');
-        document.getElementById('phoneScreen').classList.remove('hidden');
-        document.getElementById('phoneInput').value = '';
-        document.getElementById('phoneError').style.display = 'none';
-        document.getElementById('phoneSuccess').style.display = 'none';
-        document.getElementById('loginBtn').disabled = false;
-        document.getElementById('loginBtn').innerText = '🔓 Login / Sign Up';
+        document.getElementById('loginScreen').classList.remove('hidden');
+        document.getElementById('loginUsername').value = '';
+        document.getElementById('loginPassword').value = '';
+        document.getElementById('loginError').style.display = 'none';
+        document.getElementById('loginForm').classList.remove('hidden');
+        document.getElementById('signupForm').classList.add('hidden');
+    }
+
+    // Save user data to localStorage
+    function saveUserData() {
+        if (currentUser) {
+            users[currentUser].data = sapData;
+            localStorage.setItem('sapLibraryUsers', JSON.stringify(users));
+        }
     }
 
     // App Functions
@@ -701,7 +730,7 @@
         if (idx === "") sapData[currentModule].items.push(newItem);
         else sapData[currentModule].items[idx] = newItem;
 
-        saveToCloud();
+        saveUserData();
         editModal.hide();
         render();
     }
@@ -710,7 +739,7 @@
         const idx = document.getElementById('editIndex').value;
         if (idx !== "" && confirm("Delete this topic?")) {
             sapData[currentModule].items.splice(idx, 1);
-            saveToCloud();
+            saveUserData();
             editModal.hide();
             render();
         }
